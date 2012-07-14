@@ -4,3 +4,4 @@ exports.index = function(req, res) {
 
 exports.api = require('./api');
 exports.bookmarklet = require('./bookmarklet').bookmarklet;
+exports.images = require('./images').images;

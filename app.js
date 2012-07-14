@@ -25,6 +25,7 @@ app.get('/', routes.index);
 app.get('/bookmarklet', routes.bookmarklet);
 app.get('/api/get', routes.api.get);
 app.get('/api/post', routes.api.post);
+app.get('/images/*', routes.images);
 
 app.listen(3000, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);

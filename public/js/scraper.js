@@ -7,14 +7,14 @@
       console.log(msg);
     }
   }
-  
+
   var inspiration_server = "http://localhost:3000";
   var containerId = "inspiration3141592653589793";
-  
+
   log("20120216.1");
 
   var thumbSize = 80;
-  
+
   var cssReset = $('<style type="text/css"></style>');
   cssReset.text('#' + containerId + ', ' + '#' + containerId + ' * {	background: #FFFFFF; margin: 0; 	padding: 0; border: 0; 	font-size: 100%; 	font: inherit;  	vertical-align: baseline; color: black;}');
   var container = $('<div id="' + containerId + '"></div>');
@@ -65,7 +65,7 @@
 
     images.push(addThumb(url, w, h));
   });
-  
+
   console.log(images);
 
   //VIMEO
@@ -88,11 +88,6 @@
     var script = $('<script src="'+url+'"></script>');
     $("body").append(script);
   }
-  
-  var url ="http://localhost:3000/api/post?img=http%3A%2F%2Fsc-base%2Fblog%2Fting-browser%2Fting-browser_thumb.jpg&referer=http%3A%2F%2Fsc-base%2Fblog%2F&title=Marcin%20Ignac%20%3A%20All%20posts&tags=ui%2C%20web%2C%20jquery&callback=inspiration_callback_1234567890&";    
-  var script = $('<script src="'+url+'"></script>');
-  $("body").append(script);
-    
 
   window.inspiration_callback_1234567890 = function(error) {
     if (error != undefined) {
@@ -163,4 +158,5 @@
   });
 
   loaderThumb.hide();
+
 })();

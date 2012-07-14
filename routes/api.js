@@ -29,26 +29,10 @@ exports.get = function(req, res) {
         if (images.push(image) == imagesData.length) {
             res.send(JSON.stringify(images));
         }
-      })
+      });
     });
   });
 };
-
-function downloadAndCreateThumb(imageFile, callback) {
-  utils.downloadFile(imageFile, __dirname + "/../content/temp", function(err, file) {
-    var dir = path.dirname(file);
-    var ext = path.extname(file);
-    var base = path.basename(file, ext);
-    var targetFile = path.join(dir, base + "_thumb" + ext);
-
-    console.log("Downloaded", err, file);
-
-    utils.resizeImage(file, targetFile, 0, function(err) {
-      console.log("Created thumb", err, targetFile);
-      callback(err);
-    });
-  });
-}
 
 exports.post = function(req, res) {
   var img = req.query.img;
@@ -60,7 +44,7 @@ exports.post = function(req, res) {
   console.log("Downloading...", title, tags);
   console.log("Downloading...", img);
 
-  downloadAndCreateThumb(img, function(err) {
+  utils.downloadAndCreateThumb(img, function(err) {
     res.setHeader("Content-Type", "text/javascript");
     var body = '';
     body += 'var post = false;\n'

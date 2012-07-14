@@ -1,0 +1,103 @@
+body {
+  margin: 0;
+  font-family: helvetica, verdana, arial;
+  background: white;
+  xbackground: black;
+}
+
+body * {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+  color: #FF4400;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+a.titleLink {
+  color: #999
+}
+
+h1 {
+  padding: 0.5em;
+  font-size: 200%;
+  text-transform: uppercase;
+}
+
+h1 a {
+  color: #000;
+}
+
+h1 span {
+  font-weight: 100;
+}
+
+.column {
+  width: 300px;
+  margin: 10px 0 0 10px;
+  float: left;
+}
+
+.imageWrapper {
+  width: 300px;
+  position: relative;
+  xbackground: yellow;
+
+  x-webkit-transition: all 1s ease-in-out;
+  x-moz-transition: all 1s ease-in-out;
+  x-o-transition: all 1s ease-in-out;
+  x-ms-transition: all 1s ease-in-out;
+}
+
+.imageWrapper {
+  margin-bottom: 10px;
+}
+
+.imageWrapper img {
+  -webkit-transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  -o-transition: all 0.5s ease-in-out;
+  -ms-transition: all 0.5s ease-in-out;
+}
+
+.imageWrapper .overlay {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  padding: 5px;
+  display: none;
+}
+
+.imageWrapper:hover .overlay {
+  display: block;
+}
+
+.imageWrapper h2 {
+  width: 280px;
+  max-width: 280px;
+  padding: 5px;
+  background: rgba(255, 255, 255, 1);
+  color: black;
+  xbackground: black;
+  xcolor: white;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-size: 125%;
+  font-weight: 100;
+}
+
+.imageWrapper .linksWrapper {
+  width: 280px;
+  background: rgba(255, 255, 255, 1);
+  xbackground: black;
+  padding: 0 5px 5px 5px;
+}
+
+.imageWrapper img {
+  cursor: pointer;
+}

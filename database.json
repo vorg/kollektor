@@ -1,0 +1,18 @@
+{
+  "default": "dev",
+
+  "dev": {
+    "driver": "sqlite3",
+    "filename": "content/inspiration.sqlite"
+  },
+
+  "test": {
+    "driver": "sqlite3",
+    "filename": "content/inspiration.sqlite"
+  },
+
+  "prod": {
+    "driver": "sqlite3",
+    "filename": "content/inspiration.sqlite"
+  }
+}

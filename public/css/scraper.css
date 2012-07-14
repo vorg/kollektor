@@ -1,0 +1,29 @@
+#inspiration3141592653589793 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #FFF;
+  padding: 0 0 1px 0;
+  border-bottom:2px solid black; 
+  z-index: 999;
+}
+
+#inspiration3141592653589793 .thumb {
+  border: 1px solid #FFF;
+  margin: 1px 0 0 1px;
+  width: 80px;
+  height: 80px;
+  float: left;
+  position: relative;
+  overflow: hidden;
+}
+
+#inspiration3141592653589793 .thumb:hover {
+  cursor: pointer;
+}
+
+
+#inspiration3141592653589793 .thumb img {
+  position: absolute;
+}

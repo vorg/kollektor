@@ -1,12 +1,15 @@
 javascript:(
-  function() {       
+  function() {
     var body = document.getElementsByTagName("body")[0];
-    var head = document.getElementsByTagName("head")[0];      
+    var head = document.getElementsByTagName("head")[0];
     function appendScript() {
-      var script = document.createElement("script");        
+      var script = document.createElement("script");
       body.appendChild(script);
-      script.src = "SCRAPER_JS";        
-      var link = document.createElement("link");                
+      script.src = "SCRAPER_JS";
+      var scriptJQuery = document.createElement("script");
+      body.appendChild(scriptJQuery);
+      scriptJQuery.src = "JQUERY_JS";
+      var link = document.createElement("link");
       link.rel = "stylesheet";
       link.type = "text/css";
       link.href = "SCRAPER_CSS";
@@ -17,8 +20,8 @@ javascript:(
     }
     else {
       var oldDocumentOnReady = document.onready;
-      document.onready = function(e) {          
-        body = document.getElementsByTagName("body")[0];      
+      document.onready = function(e) {
+        body = document.getElementsByTagName("body")[0];
         setTimeout(appendScript, 300);
         document.onready = oldDocumentOnReady;
         if (document.onready) document.onready(e);

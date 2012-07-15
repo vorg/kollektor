@@ -20,7 +20,12 @@ a:hover {
 }
 
 a.titleLink {
-  color: #999
+  color: #999;
+  display: block;
+}
+
+a.contentEditable h2 {
+  background: #FFFFDD;
 }
 
 h1 {

@@ -6,6 +6,16 @@ var columnWidth = thumbWidth + columnMargin;
 var columns = [];
 var imagesData;
 
+String.prototype.format = function() {
+  var args = arguments;
+  return this.replace(/{(\d+)}/g, function(match, number) {
+    return typeof args[number] != 'undefined'
+      ? args[number]
+      : match
+    ;
+  });
+};
+
 function buildColumns() {
   var w = document.body.clientWidth;
   var numColumns = Math.floor(w/columnWidth);
@@ -33,6 +43,15 @@ function findColumn() {
 }
 
 
+function selectElement(element) {
+  var range = document.createRange();
+  var sel = window.getSelection();
+  range.setStart(element.get(0), 1);
+  //range.collapse(true);
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
 // imageInfo {}
 // cachedUrl: "content/"
 // orignalUrl: ""
@@ -51,23 +70,24 @@ function addImage(imgInfo) {
   var overlay = $('<div class="overlay"></div>');
   wrapper.append(overlay);
 
-  var titleLink = $('<a href="' + imgInfo.referer + '" class="titleLink"></a>');
-  var title = $('<h2>' + imgInfo.title + '</h2>');
-  titleLink.append(title);
-  overlay.append(titleLink);
-
+  var titleTag = '<a href="{0}" class="titleLink"><h2>{1}</h2></a>';
+  var title = $(titleTag.format(imgInfo.referer, imgInfo.title));
+  overlay.append(title);
 
   var preventClick = false;
   var preventTimeout = 0;
-  titleLink.mousedown(function(e) {
+  title.mousedown(function(e) {
     preventTimeout = setTimeout(function() {
       preventClick = true;
       preventTimeout = 0;
-      titleLink.attr("contenteditable", "true");
-    }, 1000)
+      title.attr("contenteditable", "true");
+      title.addClass("contentEditable");
+      title.data("oldtitle", title.find("h2").text())
+      selectElement(title.find("h2"));
+    }, 500)
   });
 
-  titleLink.mouseup(function(e) {
+  title.mouseup(function(e) {
     if (preventTimeout) {
       clearTimeout(preventTimeout);
       preventTimeout = 0;
@@ -75,7 +95,28 @@ function addImage(imgInfo) {
     }
   });
 
-  titleLink.click(function(e) {
+ title.keydown(function(e) {
+   var finishEditing = false;
+
+   if(e.keyCode == 13) { //ENTER
+     finishEditing = true;
+     var newTitle = title.find("h2").text();
+     console.log("Saving new title...", newTitle, "for image", imgInfo.id);
+   }
+   else if (e.keyCode == 27) { //ESCAPE
+     title.find("h2").text(title.data("oldtitle"));
+     finishEditing = true;
+   }
+
+   if (finishEditing) {
+     title.attr("contenteditable", "false");
+     title.removeClass("contentEditable");
+     title.attr("oldtitle", "");
+     title.blur();
+   }
+ });
+
+  title.click(function(e) {
     if (preventClick) {
       e.preventDefault()
     }

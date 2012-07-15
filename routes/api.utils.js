@@ -6,11 +6,21 @@ var path = require('path');
 var Canvas = require('canvas');
 var Image = Canvas.Image;
 
-exports.downloadFile = function(fileUrl, downloadPath, callback) {
+String.prototype.format = function() {
+  var args = arguments;
+  return this.replace(/{(\d+)}/g, function(match, number) {
+    return typeof args[number] != 'undefined'
+      ? args[number]
+      : match
+    ;
+  });
+};
+
+exports.downloadFile = function(fileUrl, downloadFile, callback) {
   var host = url.parse(fileUrl).hostname;
   var path = url.parse(fileUrl).path;
   var filename = url.parse(fileUrl).pathname.split("/").pop();
-  var downloadfile = fs.createWriteStream(downloadPath + "/" +  filename, {'flags': 'a'});
+  var downloadfile = fs.createWriteStream(downloadFile, {'flags': 'a'});
 
   console.log("downloadFile", fileUrl);
 
@@ -85,7 +95,7 @@ exports.resizeImage = function(file, targetFile, targetWidth, targetHeight, call
     ctx.drawImage(img, 0, 0, width, height);
 
     saveCanvasToFile(canvas, targetFile, function(err) {
-      callback(err);
+      callback(err, width/height);
     });
   };
 
@@ -93,18 +103,18 @@ exports.resizeImage = function(file, targetFile, targetWidth, targetHeight, call
 }
 
 exports.downloadAndCreateThumb = function(imageFile, callback) {
-  exports.downloadFile(imageFile, __dirname + "/../content/temp", function(err, file) {
+  exports.downloadFile(imageFile, __dirname + "/../content/images", function(err, file) {
     var dir = path.dirname(file);
     var ext = path.extname(file);
     var base = path.basename(file, ext);
-    var targetFile = path.join(dir, base + "_thumb" + ext);
+    var timestamp = (new Date()).getTime();
+    var cachedUrl = base + "_" + timestamp + ext;
+    var thumbUrl = base + "_" + timestamp + "_thumb" + ext;
+    var thumbFile = path.join(dir, thumbUrl);
 
-    console.log("Downloaded", err, file);
-
-    exports.resizeImage(file, targetFile, 300, 0, function(err) {
-      console.log("Created thumb", err, targetFile);
-      callback(err);
+    exports.resizeImage(file, thumbFile, 300, 0, function(err, ratio) {
+      console.log("Created thumb", err, cachedUrl, thumbUrl, ratio);
+      callback(err, cachedUrl, thumbUrl, ratio);
     });
   });
 }
-

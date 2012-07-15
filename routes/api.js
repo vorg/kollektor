@@ -10,9 +10,21 @@ exports.get = function(req, res) {
   persist.connect(function(err, connection) {
     if(err) { throw err; }
 
+    var options = req.originalUrl.replace("/api/get", "").split("/");
+    var tagsFilter = null;
+
+    var i = 0;
+    while(options.length > 0) {
+      var option = options.shift();
+      if (option == "tag") {
+        tagsFilter = options.shift().split("+");
+      }
+    }
+
     //limit(5) - paging
     models.Image.using(connection).orderBy('id', 'desc').include("tags").all(function(err, imagesData) {
       var images = [];
+      var totalFilteredOut = 0;
       imagesData.forEach(function(imageData) {
         var image = {
           id: imageData.id,
@@ -24,10 +36,24 @@ exports.get = function(req, res) {
           ratio : imageData.ratio,
           tags: []
         }
+        var hasTags = 0;
+        var filteredOut = false;
         imageData.tags.forEach(function(tagData) {
+          if (tagsFilter && (tagsFilter.indexOf(tagData.name) !== -1)) {
+            hasTags++;
+          }
           image.tags.push(tagData.name);
         });
-        if (images.push(image) == imagesData.length) {
+
+        if (tagsFilter && hasTags != tagsFilter.length) {
+          filteredOut = true;
+          totalFilteredOut++;
+        }
+        else {
+          images.push(image);
+        }
+
+        if (images.length + totalFilteredOut == imagesData.length) {
             res.send(JSON.stringify(images));
         }
       });

@@ -66,7 +66,7 @@ function addImage(imgInfo) {
       titleLink.attr("contenteditable", "true");
     }, 1000)
   });
-  
+
   titleLink.mouseup(function(e) {
     if (preventTimeout) {
       clearTimeout(preventTimeout);
@@ -81,8 +81,6 @@ function addImage(imgInfo) {
     }
   });
 
-
-
   var numLinks = 0;
 
   var linksWrapper = $('<div class="linksWrapper"></div>')
@@ -90,10 +88,10 @@ function addImage(imgInfo) {
   $(imgInfo.tags).each(function() {
     var tag = this;
     if (numLinks++ > 0) linksWrapper.append(", ");
-    linksWrapper.append('<a href="'+inspiration_server+'tag/'+tag+'">'+tag+'</a>');
+    linksWrapper.append('<a href="'+inspiration_server+'/tag/'+tag+'">'+tag+'</a>');
   })
 
-  
+
   linksWrapper.click(function() {linksWrapper.attr("contenteditable", "true"); });
 
   overlay.append(linksWrapper);
@@ -118,9 +116,11 @@ $(document).ready(function() {
 
   console.log("getting from " + inspiration_server);
 
-  $.get(inspiration_server + "/api/get", function(data) {
+  var path = document.location.pathname;
+
+  $.get(inspiration_server + "/api/get" + path, function(data) {
     console.log("got! " + data.length);
-    imagesData = data;    
+    imagesData = data;
     if (inspiration_tags) {
       $("h1").append("<span> / " + inspiration_tags + "</span>");
     }

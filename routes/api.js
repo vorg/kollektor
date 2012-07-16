@@ -98,3 +98,43 @@ exports.post = function(req, res) {
   })
 }
 
+exports.update = function(req, res) {
+  var imageId = req.query.id;
+
+  persist.connect(function(err, connection) {
+    if(err) { throw err; }
+
+    if (req.query.title) {
+      models.Image.update(connection, Number(imageId), { title: req.query.title}, function(err) {
+        if (err) res.send(err);
+        else res.send("OK");
+      });
+    }
+    else if (req.query.tags) {
+      var updatedTags = req.query.tags.split(",");
+      console.log("updatedTags", updatedTags);
+      db.findTags(connection, updatedTags, function(tags, newTags) {
+        function saveUpdatedImage() {
+          models.Image.using(connection).where('id = ?', imageId).all(function(err, imagesData) {
+            console.log("tags.length", tags.length, newTags.length);
+            imagesData[0].tags = tags;
+            imagesData[0].save(connection, function(err) {
+              if (err) res.send(err);
+              else res.send("OK " + JSON.stringify(newTags));
+            });
+          });
+        }
+
+        if (newTags) {
+          connection.save(newTags, saveUpdatedImage);
+        }
+        else {
+          saveUpdatedImage();
+        }
+
+      })
+    }
+  });
+
+}
+

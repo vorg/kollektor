@@ -2,7 +2,7 @@ var persist = require("persist");
 var type = persist.type;
 var models = require("../models");
 
-function findTags(connection, tagNames, callback) {
+exports.findTags = function(connection, tagNames, callback) {
   var tags = [];
   var newTags = [];
 
@@ -33,7 +33,7 @@ function addImage(connection, imageData, callback) {
   var data = [];
   console.log("finding", imageData.tags);
 
-  findTags(connection, imageData.tags, function(tags, newTags) {
+  exports.findTags(connection, imageData.tags, function(tags, newTags) {
     imageData.tags = tags;
     if (newTags.length > 0) {
       data.push.apply(data, newTags);

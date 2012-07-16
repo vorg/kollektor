@@ -24,6 +24,7 @@ a.titleLink {
   display: block;
 }
 
+div.linksWrapper.contentEditable,
 a.contentEditable h2 {
   background: #FFFFDD;
 }

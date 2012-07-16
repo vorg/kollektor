@@ -52,6 +52,67 @@ function selectElement(element) {
   sel.addRange(range);
 }
 
+function makeContentEditable(element, onStart, onEnd) {
+  var preventClick = false;
+  var preventTimeout = 0;
+  element.mousedown(function(e) {
+    preventTimeout = setTimeout(function() {
+      preventClick = true;
+      preventTimeout = 0;
+      element.attr("contenteditable", "true");
+      element.addClass("contentEditable");
+      onStart();
+    }, 500)
+  });
+
+  element.mouseup(function(e) {
+    if (preventTimeout) {
+      clearTimeout(preventTimeout);
+      preventTimeout = 0;
+      preventClick = false;
+    }
+  });
+
+ element.keydown(function(e) {
+   var finishEditing = false;
+   var success = false;
+
+   if(e.keyCode == 13) { //ENTER
+     finishEditing = true;
+     success = true;
+   }
+   else if (e.keyCode == 27) { //ESCAPE
+     finishEditing = true;
+   }
+
+   if (finishEditing) {
+     element.attr("contenteditable", "false");
+     element.removeClass("contentEditable");
+     element.blur();
+     onEnd(success);
+   }
+ });
+
+  element.click(function(e) {
+    if (preventClick) {
+      e.preventDefault()
+    }
+  });
+}
+
+function updateImageData(params) {
+  var request = "/api/update"
+  request += "?";
+  for(var paramName in params) {
+     request += paramName + "=" + encodeURIComponent(params[paramName]) + "&";
+  }
+
+   $.get(inspiration_server + request, function(data) {
+     console.log("data", data);
+   });
+}
+
+
 // imageInfo {}
 // cachedUrl: "content/"
 // orignalUrl: ""
@@ -70,73 +131,83 @@ function addImage(imgInfo) {
   var overlay = $('<div class="overlay"></div>');
   wrapper.append(overlay);
 
+  //TITLE
+
   var titleTag = '<a href="{0}" class="titleLink"><h2>{1}</h2></a>';
   var title = $(titleTag.format(imgInfo.referer, imgInfo.title));
   overlay.append(title);
 
-  var preventClick = false;
-  var preventTimeout = 0;
-  title.mousedown(function(e) {
-    preventTimeout = setTimeout(function() {
-      preventClick = true;
-      preventTimeout = 0;
-      title.attr("contenteditable", "true");
-      title.addClass("contentEditable");
+  makeContentEditable(
+    title,
+    function() {
       title.data("oldtitle", title.find("h2").text())
       selectElement(title.find("h2"));
-    }, 500)
-  });
+    },
+    function(success) {
+      if (success) {
+        var newTitle = title.find("h2").text();
+        console.log("Saving new title...", newTitle, "for image", imgInfo.id);
+        updateImageData({
+          id: imgInfo.id,
+          title: newTitle
+        })
 
-  title.mouseup(function(e) {
-    if (preventTimeout) {
-      clearTimeout(preventTimeout);
-      preventTimeout = 0;
-      preventClick = false;
+      }
+      else {
+        title.find("h2").text(title.data("oldtitle"));
+      }
+      title.data("oldtitle", "");
     }
-  });
+  );
 
- title.keydown(function(e) {
-   var finishEditing = false;
-
-   if(e.keyCode == 13) { //ENTER
-     finishEditing = true;
-     var newTitle = title.find("h2").text();
-     console.log("Saving new title...", newTitle, "for image", imgInfo.id);
-   }
-   else if (e.keyCode == 27) { //ESCAPE
-     title.find("h2").text(title.data("oldtitle"));
-     finishEditing = true;
-   }
-
-   if (finishEditing) {
-     title.attr("contenteditable", "false");
-     title.removeClass("contentEditable");
-     title.attr("oldtitle", "");
-     title.blur();
-   }
- });
-
-  title.click(function(e) {
-    if (preventClick) {
-      e.preventDefault()
-    }
-  });
-
-  var numLinks = 0;
+  //TAG LINKS
 
   var linksWrapper = $('<div class="linksWrapper"></div>')
 
-  $(imgInfo.tags).each(function() {
-    var tag = this;
-    if (numLinks++ > 0) linksWrapper.append(", ");
-    linksWrapper.append('<a href="'+inspiration_server+'/tag/'+tag+'">'+tag+'</a>');
-  })
+  function tagsToLinks(tags) {
+    var numLinks = 0;
+    linksWrapper.html("");
+    $(tags).each(function() {
+      var tag = this;
+      if (numLinks++ > 0) linksWrapper.append(", ");
+      linksWrapper.append('<a href="'+inspiration_server+'/tag/'+tag+'">'+tag+'</a>');
+    })
+  }
 
-
-  linksWrapper.click(function() {linksWrapper.attr("contenteditable", "true"); });
-
+  tagsToLinks(imgInfo.tags);
   overlay.append(linksWrapper);
 
+  function cleanTagText(text) {
+    return text.replace(/^\s+/, '').replace(/,/g, ' ').replace(/\s+/g, ' ');
+  }
+
+  makeContentEditable(
+    linksWrapper,
+    function() {
+      linksWrapper.data("oldtags", linksWrapper.text());
+      linksWrapper.html(cleanTagText(linksWrapper.text()));
+      selectElement(linksWrapper);
+    },
+    function(success) {
+      var tags;
+      if (success) {
+        tags = cleanTagText(linksWrapper.text()).split(' ');
+        console.log("Saving new tags...", tags, "for image", imgInfo.id);
+        updateImageData({
+          id: imgInfo.id,
+          tags: tags.join(",")
+        })
+      }
+      else {
+        tags = cleanTagText(linksWrapper.data("oldtags")).split(' ');
+      }
+      tagsToLinks(tags);
+
+      linksWrapper.data("oldtags", "");
+    }
+  );
+
+  //IMAGE
 
   $(image).attr("data-src", "/images/" + imgInfo.thumbUrl);
 

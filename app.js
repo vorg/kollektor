@@ -27,6 +27,9 @@ app.get('/bookmarklet', routes.bookmarklet);
 app.get('/api/get/*', routes.api.get);
 app.get('/api/post', routes.api.post);
 app.get('/api/update', routes.api.update);
+app.get('/api/tags', routes.api.tags);
+app.get('/api/latest', routes.api.latest);
+app.get('/tags', routes.tags);
 app.get('/images/*', routes.images);
 
 app.listen(3000, function(){

@@ -8,7 +8,10 @@ var path = require('path');
 
 exports.get = function(req, res) {
   persist.connect(function(err, connection) {
-    if(err) { throw err; }
+    if(err) {
+      console.log("api.get failed")
+      throw err;
+    }
 
     var options = req.originalUrl.replace("/api/get", "").split("/");
     var tagsFilter = null;
@@ -58,6 +61,7 @@ exports.get = function(req, res) {
         }
       });
     });
+    connection.close();
   });
 };
 
@@ -134,7 +138,42 @@ exports.update = function(req, res) {
 
       })
     }
-  });
 
+    connection.close();
+  });
+}
+
+exports.tags = function(req, res) {
+  persist.connect(function(err, connection) {
+    if(err) {
+      console.log("api.tags failed");
+      throw err;
+    }
+
+    var tagsQuery = "SELECT name, COUNT(tag_id) as count FROM images_tags it JOIN tags t ON it.tag_id = t.id GROUP BY tag_id ORDER BY COUNT(tag_id) DESC";
+
+    connection.runSqlAll(tagsQuery, [], function(err, tags) {
+      res.send(JSON.stringify(tags));
+    });
+
+    connection.close();
+  });
+}
+
+exports.latest = function(req, res) {
+  persist.connect(function(err, connection) {
+    if(err) {
+      console.log("api.latest failed")
+      throw err;
+    }
+
+    var latestQuery = "SELECT thumb_url FROM images JOIN images_tags ON images.id = images_tags.image_id JOIN tags ON images_tags.tag_id = tags.id WHERE tags.name = ? ORDER BY images.id DESC LIMIT 5";
+
+    connection.runSqlAll(latestQuery, [req.query.tag], function(err, images) {
+      res.send(JSON.stringify(images));
+    });
+
+    connection.close();
+  });
 }
 

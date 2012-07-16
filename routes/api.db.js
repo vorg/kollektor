@@ -56,6 +56,7 @@ exports.saveImage = function(imageData, callback) {
     else {
       addImage(connection, imageData, callback);
     }
+    connection.close();
   });
 }
 

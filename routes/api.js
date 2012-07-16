@@ -20,7 +20,7 @@ exports.get = function(req, res) {
     while(options.length > 0) {
       var option = options.shift();
       if (option == "tag") {
-        tagsFilter = options.shift().split("+");
+        tagsFilter = unescape(options.shift()).split("+");
       }
     }
 

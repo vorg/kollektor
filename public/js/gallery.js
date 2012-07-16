@@ -170,7 +170,19 @@ function addImage(imgInfo) {
     $(tags).each(function() {
       var tag = this;
       if (numLinks++ > 0) linksWrapper.append(", ");
-      linksWrapper.append('<a href="'+inspiration_server+'/tag/'+tag+'">'+tag+'</a>');
+      var tagLink = $('<a href="'+inspiration_server+'/tag/'+tag+'">'+tag+'</a>');
+      tagLink.click(function(e) {
+        if (e.shiftKey) {
+          e.preventDefault();
+          if (document.location.href.indexOf("/tag/") > 0) {
+            document.location.href = document.location.href + "+" + tag;
+          }
+          else {
+            document.location.href = tagLink.attr("href");
+          }
+        }
+      })
+      linksWrapper.append(tagLink);
     })
   }
 

@@ -46,7 +46,7 @@ function addSet(tag, i) {
   set.append(title);
 
   setTimeout(function() {
-    $.get(inspiration_server + "/api/latest?tag=" + tag.name, function(images) {
+    $.get(inspiration_server + "/api/latest?tag=" + escape(tag.name), function(images) {
       $(images).each(function(i) {
         var style = "";
         if (i > 0) {

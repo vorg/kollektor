@@ -123,7 +123,7 @@ function updateImageData(params) {
 function addImage(imgInfo) {
   var wrapper = $('<div class="imageWrapper"></div>');
 
-  var link = $('<a href="' + imgInfo.referer + '"></a>');
+  var link = $('<a href="' + inspiration_server + "/images/"+ imgInfo.cachedUrl + '"></a>');
   var image = new Image();
   link.append(image);
   wrapper.append(link);

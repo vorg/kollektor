@@ -16,13 +16,14 @@ String.prototype.format = function() {
   });
 };
 
-exports.downloadFile = function(fileUrl, downloadFile, callback) {
+exports.downloadFile = function(fileUrl, downloadPath, callback) {
   var host = url.parse(fileUrl).hostname;
   var path = url.parse(fileUrl).path;
-  var filename = url.parse(fileUrl).pathname.split("/").pop();
-  var downloadfile = fs.createWriteStream(downloadFile, {'flags': 'a'});
+  //console.log("urls", fileUrl, url.parse(fileUrl));
+  var filename = path.split("/").pop();
+  var downloadfile = fs.createWriteStream(downloadPath, {'flags': 'a'});
 
-  console.log("downloadFile", fileUrl);
+  //console.log("downloadFile", fileUrl, "to", downloadfile);
 
   var options = {
       host: host,
@@ -37,8 +38,13 @@ exports.downloadFile = function(fileUrl, downloadFile, callback) {
 
     res.on("end", function () {
       downloadfile.end();
-      callback(null, downloadPath + "/" +  filename);
+      console.log("downloaded", downloadPath);
+      callback(null, downloadPath);
     });
+  });
+
+  req.on('error', function(e) {
+    console.log('problem with request: ' + e.message);
   });
 
   req.end();
@@ -103,18 +109,20 @@ exports.resizeImage = function(file, targetFile, targetWidth, targetHeight, call
 }
 
 exports.downloadAndCreateThumb = function(imageFile, callback) {
-  exports.downloadFile(imageFile, __dirname + "/../content/images", function(err, file) {
-    var dir = path.dirname(file);
-    var ext = path.extname(file);
-    var base = path.basename(file, ext);
-    var timestamp = (new Date()).getTime();
-    var cachedUrl = base + "_" + timestamp + ext;
-    var thumbUrl = base + "_" + timestamp + "_thumb" + ext;
-    var thumbFile = path.join(dir, thumbUrl);
+  var contentImagesPath = path.normalize(__dirname + "/../content/images");
 
-    exports.resizeImage(file, thumbFile, 300, 0, function(err, ratio) {
-      console.log("Created thumb", err, cachedUrl, thumbUrl, ratio);
-      callback(err, cachedUrl, thumbUrl, ratio);
+  var ext = path.extname(imageFile);
+  var base = path.basename(imageFile, ext);
+  var timestamp = (new Date()).getTime();
+  var cachedFile = base + "_" + timestamp + ext;
+
+  exports.downloadFile(imageFile, contentImagesPath + "/" + cachedFile, function(err, file) {
+    var dir = path.dirname(file);
+    var thumbFile = base + "_" + timestamp + "_thumb" + ext;
+    var thumbFilePath = path.join(dir, thumbFile);
+    exports.resizeImage(file, thumbFilePath, 300, 0, function(err, ratio) {
+      //console.log("Created thumb", err, cachedUrl, thumbUrl, ratio);
+      callback(err, cachedFile, thumbFile, ratio);
     });
   });
 }

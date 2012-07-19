@@ -60,4 +60,32 @@ exports.saveImage = function(imageData, callback) {
   });
 }
 
+exports.delete = function(imageId, callback) {
+  persist.connect(function(err, connection) {
+    if (err) {
+      callback(err);
+      return;
+    }
+    else {
+      models.Image.using(connection).where('id = ?', [imageId]).first(function(err, image) {
+        var cachedImageFile = image.cachedUrl;
+        var thumbImageFile = image.thumbUrl;
+        image.tags = [];
+        image.save(connection, function(err) {
+          if (err) {
+            callback(err);
+            return;
+          }
+          else {
+            image.delete(connection, function(err) {
+              callback(err, cachedImageFile, thumbImageFile);
+            });
+          }
+        });
+      });
+    }
+    connection.close();
+  });
+}
+
 

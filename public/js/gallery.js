@@ -162,7 +162,23 @@ function addImage(imgInfo) {
 
   //TAG LINKS
 
-  var linksWrapper = $('<div class="linksWrapper"></div>')
+  function refreshImage() {
+
+  }
+
+  function deleteImage() {
+    if (!confirm("Are you sure to delete " + imgInfo.title)) {
+      return false;
+    }
+    $.get(inspiration_server + "/api/delete?imageId=" + imgInfo.id, function(result) {
+      if (!result.err) {
+        wrapper.slideUp();
+      }
+    });
+    return false;
+  }
+
+  var linksWrapper = $('<div class="linksWrapper"></div>');
 
   function tagsToLinks(tags) {
     var numLinks = 0;
@@ -184,10 +200,29 @@ function addImage(imgInfo) {
       })
       linksWrapper.append(tagLink);
     })
+
+    var refreshLink = $('<a href="#" class="optionsLink">refresh</a>');
+    refreshLink.click(refreshImage);
+
+    var deleteLink = $('<a href="#" class="optionsLink">delete</a>');
+    deleteLink.click(deleteImage);
+
+    linksWrapper.append(", ", refreshLink, ", ", deleteLink);
   }
 
   tagsToLinks(imgInfo.tags);
   overlay.append(linksWrapper);
+
+  //OPTIONS
+
+  //var optionsWrapper = $('<div class="optionsWrapper"></div>')
+  //overlay.append(optionsWrapper);
+  //
+  //var deleteLink = $('<a href="#" class="deleteLink"></a>');
+  //optionsWrapper.append(deleteLink);
+  //
+  //var refreshLink = $('<a href="#" class="refreshLink"></a>');
+  //optionsWrapper.append(refreshLink);
 
   function cleanTagText(text) {
     return text.replace(/^\s+/, '').replace(/,/g, ' ').replace(/\s+/g, ' ').replace(/\s+$/, '');
@@ -196,6 +231,7 @@ function addImage(imgInfo) {
   makeContentEditable(
     linksWrapper,
     function() {
+      linksWrapper.find(".optionsLink").remove();
       linksWrapper.data("oldtags", linksWrapper.text());
       linksWrapper.html(cleanTagText(linksWrapper.text()));
       selectElement(linksWrapper);

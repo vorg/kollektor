@@ -126,3 +126,11 @@ exports.downloadAndCreateThumb = function(imageFile, callback) {
     });
   });
 }
+
+exports.deleteImageFile = function(imageFile) {
+  var contentImagesPath = path.normalize(__dirname + "/../content/images");
+  var imageFilePath = contentImagesPath + "/" + imageFile;
+  if (fs.existsSync(imageFilePath)) {
+      fs.unlinkSync(imageFilePath);
+  }
+}

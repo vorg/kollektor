@@ -60,6 +60,9 @@ h1 span {
   x-ms-transition: all 1s ease-in-out;
 }
 
+.imageWrapper .titleLink {
+}
+
 .imageWrapper {
   margin-bottom: 10px;
 }
@@ -102,6 +105,17 @@ h1 span {
   background: rgba(255, 255, 255, 1);
   xbackground: black;
   padding: 0 5px 5px 5px;
+}
+
+.imageWrapper .optionsWrapper {
+  background: rgba(255, 255, 255, 1);
+  font-size: 90%;
+}
+
+.optionsLink {
+  color: #AAA;
+  font-weight: 100;
+  xcolor: rgb(64, 218, 158);
 }
 
 .imageWrapper img {

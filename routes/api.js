@@ -163,7 +163,7 @@ exports.tags = function(req, res) {
 exports.latest = function(req, res) {
   persist.connect(function(err, connection) {
     if(err) {
-      console.log("api.latest failed")
+      console.log("api.latest failed");
       throw err;
     }
 
@@ -175,5 +175,13 @@ exports.latest = function(req, res) {
 
     connection.close();
   });
+}
+
+exports.delete = function(req, res) {
+  db.delete(req.query.imageId, function(err, chachedImageFile, thumbImageFile) {
+    utils.deleteImageFile(chachedImageFile);
+    utils.deleteImageFile(thumbImageFile);
+    res.send(JSON.stringify({ err: err }));
+  })
 }
 

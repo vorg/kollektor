@@ -8,6 +8,10 @@
     }
   }
 
+  function cleanTagText(text) {
+    return text.replace(/^\s+/, '').replace(/,/g, ' ').replace(/\s+/g, ' ').replace(/\s+$/, '');
+  }
+
   var inspiration_server = "http://localhost:3000";
   var containerId = "inspiration3141592653589793";
 
@@ -151,7 +155,8 @@
     var img = imgBox.val();
     var referer = refererBox.val();
     var title = titleBox.val();
-    var tags = tagsBox.val();
+
+    var tags = cleanTagText(tagsBox.val());
 
     loaderThumb.fadeIn();
     xxs(submitUrl, {img:img, referer:referer, title:title, tags:tags, callback:"inspiration_callback_1234567890"});

@@ -190,7 +190,7 @@ function addImage(imgInfo) {
   overlay.append(linksWrapper);
 
   function cleanTagText(text) {
-    return text.replace(/^\s+/, '').replace(/,/g, ' ').replace(/\s+/g, ' ');
+    return text.replace(/^\s+/, '').replace(/,/g, ' ').replace(/\s+/g, ' ').replace(/\s+$/, '');
   }
 
   makeContentEditable(
@@ -232,7 +232,6 @@ function addImage(imgInfo) {
 
   image.width = width;
   image.height = width / imgInfo.ratio;
-
 }
 
 $(document).ready(function() {

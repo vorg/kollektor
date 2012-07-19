@@ -1,7 +1,7 @@
 //TODO:
 //- autogenerate container id
 
-(function() {
+$(document).ready(function() {
   function log(msg) {
     if (window.console) {
       console.log(msg);
@@ -54,6 +54,7 @@
       imgThumbImage.attr("width", thumbSize);
     }
     imgThumbImage.attr("src", url);
+    imgThumbImage.attr("title", w + " x " + h);
     imgThumb.append(imgThumbImage);
     container.append(imgThumb);
     return imgThumbImage;
@@ -138,7 +139,6 @@
     });
   });
 
-
   $("body").bind("keydown", function(e) {
     if (e.keyCode == 27) {
       container.remove();
@@ -164,4 +164,4 @@
 
   loaderThumb.hide();
 
-})();
+});

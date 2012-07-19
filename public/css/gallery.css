@@ -107,3 +107,22 @@ h1 span {
 .imageWrapper img {
   cursor: pointer;
 }
+
+.tagLatestMain {
+}
+
+.tagLatestThumb {
+  width: 74.25px;
+  height: 75px;
+  overflow: hidden;
+  float: left;
+  margin-left: 1px;
+}
+
+.tagLatestThumb:first-child {
+  margin-left: 0;
+}
+
+.set {
+  overflow: auto;
+}

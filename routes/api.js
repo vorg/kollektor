@@ -167,7 +167,7 @@ exports.latest = function(req, res) {
       throw err;
     }
 
-    var latestQuery = "SELECT thumb_url FROM images JOIN images_tags ON images.id = images_tags.image_id JOIN tags ON images_tags.tag_id = tags.id WHERE tags.name = ? ORDER BY images.id DESC LIMIT 5";
+    var latestQuery = "SELECT thumb_url, ratio FROM images JOIN images_tags ON images.id = images_tags.image_id JOIN tags ON images_tags.tag_id = tags.id WHERE tags.name = ? ORDER BY images.id DESC LIMIT 5";
 
     connection.runSqlAll(latestQuery, [req.query.tag], function(err, images) {
       res.send(JSON.stringify(images));

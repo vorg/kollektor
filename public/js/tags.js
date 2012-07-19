@@ -41,7 +41,7 @@ function findColumn() {
 
 function addSet(tag, i) {
   var set = $("<div class='set'></div>");
-  var title = $("<h2 style='margin-top:0.5em; margin-bottom:0.25em;'><a href='{0}/tag/{1}'>#{1}#</a> [{2}]</h2>".format(inspiration_server, tag.name, tag.count));
+  var title = $("<h2 style='margin-top:0.5em; margin-bottom:0.25em;'><a href='{0}/tag/{1}'>{1}</a> [{2}]</h2>".format(inspiration_server, tag.name, tag.count));
 
   set.append(title);
 
@@ -49,14 +49,22 @@ function addSet(tag, i) {
     $.get(inspiration_server + "/api/latest?tag=" + escape(tag.name), function(images) {
       $(images).each(function(i) {
         var style = "";
-        if (i > 0) {
-          style = "width='" + thumbWidth/4 + "px'" + " " + "height='" + thumbWidth/4 + "px'";
-          //return;
+        var className = "";
+        if (i == 0) {
+          className = "tagLatestMain";
+          style = "width='" + thumbWidth + "px'";// + " " + "height='" + thumbWidth*0.75 + "px'";
         }
         else {
-          style = "width='" + thumbWidth + "px'" + " " + "height='" + thumbWidth*0.75 + "px'";
+          className = "tagLatestThumb";
+          if (this.ratio < 1) {
+              style = "width='" + thumbWidth/4 + "px'";
+          }
+          else {
+              style = "height='" + thumbWidth/4 + "px'";
+          }
+
         }
-        var img = $("<img src='{0}' {1}/>".format(inspiration_server + "/images/" + this.thumb_url, style));
+        var img = $("<div class='{0}'><img src='{1}' {2}/></div>".format(className, inspiration_server + "/images/" + this.thumb_url, style));
         set.append(img);
       })
     }, "json");

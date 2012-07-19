@@ -4,10 +4,10 @@ javascript:(
     var head = document.getElementsByTagName("head")[0];
     function appendScript() {
       var scriptJQuery = document.createElement("script");
-      body.appendChild(scriptJQuery);
+      head.appendChild(scriptJQuery);
       scriptJQuery.src = "JQUERY_JS";
       var script = document.createElement("script");
-      body.appendChild(script);
+      head.appendChild(script);
       script.src = "SCRAPER_JS";
       var link = document.createElement("link");
       link.rel = "stylesheet";

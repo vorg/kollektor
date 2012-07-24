@@ -141,7 +141,8 @@ function addImage(imgInfo, prepend) {
   //TITLE
 
   var refererTag = '<a href="{0}" class="refererLink"><h5>{1}</h5></a>';
-  var referer = $(refererTag.format(imgInfo.referer, extractHost(imgInfo.referer)));
+  var refererUrl = imgInfo.referer ? imgInfo.referer : "Unknown"
+  var referer = $(refererTag.format(refererUrl, extractHost(imgInfo.referer)));
   overlay.append(referer);
 
   makeContentEditable(

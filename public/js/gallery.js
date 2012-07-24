@@ -258,19 +258,87 @@ function addImage(imgInfo) {
   //IMAGE
 
   $(image).attr("data-src", "/images/" + imgInfo.thumbUrl);
+  if (prepend) {
+    wrapper.hide();
+    $(image).attr("src", "/images/" + imgInfo.thumbUrl);
+    setTimeout(function() {
+      wrapper.slideDown();
+    }, 1000)
+  }
 
   var width = thumbWidth;
   var height = width / imgInfo.ratio;
   wrapper.css("height", height);
   var column = findColumn();
-  column.div.append(wrapper);
+
+  if (prepend)
+    column.div.prepend(wrapper);
+  else
+    column.div.append(wrapper);
   column.height += height;
 
   image.width = width;
   image.height = width / imgInfo.ratio;
 }
 
+function buildDropZone() {
+  var xhr = new XMLHttpRequest();
+  if (!xhr.upload) {
+    console.log("XMLHttpRequest2 file upload not available!");
+    return;
+  }
+
+  function processFile(file) {
+
+    console.log("Uploading", file.name, file.type, file.size);
+
+    var xhr = new XMLHttpRequest();
+    if (xhr.upload && (file.type == "image/jpeg" || file.type == "image/gif" || file.type == "image/png")) {
+      xhr.open("POST", inspiration_server + "/api/upload");
+      var formData = new FormData();
+      formData.append("file", file);
+      xhr.send(formData);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4){
+          var imageData = JSON.parse(xhr.response);
+          addImage(imageData, true);
+        }
+      };
+    }
+  }
+
+  var dropzone = $('<div id="dropzone"><p>Drop Images Here</p></div>');
+  $("body").append(dropzone);
+
+  document.body.addEventListener('dragover', function(e) {
+    dropzone.show();
+    e.stopPropagation();
+    e.preventDefault();
+    return false;
+  });
+
+  dropzone.get(0).addEventListener('dragleave', function(e) {
+    dropzone.hide();
+    e.stopPropagation();
+    e.preventDefault();
+    return false;
+  });
+
+  document.body.addEventListener('drop', function(e) {
+    e.stopPropagation();
+    e.preventDefault();
+    dropzone.hide();
+
+    var files = e.target.files || e.dataTransfer.files;
+    for(var i=0, f; f = files[i]; i++) {
+      processFile(f);
+    }
+    return false;
+  })
+}
+
 $(document).ready(function() {
+  buildDropZone();
   buildColumns();
 
   console.log("getting from " + inspiration_server);

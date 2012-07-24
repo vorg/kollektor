@@ -6,6 +6,11 @@ exports.findTags = function(connection, tagNames, callback) {
   var tags = [];
   var newTags = [];
 
+  if (!tagNames || tagNames.length == 0) {
+    callback(tags, newTags);
+    return;
+  }
+
   tagNames.forEach(function(tagName) {
     models.Tag.using(connection).where('name = ?', tagName).all(function(err, tag) {
       if (tag.length > 0) {
@@ -33,15 +38,18 @@ function addImage(connection, imageData, callback) {
   var data = [];
   console.log("finding", imageData.tags);
 
+
   exports.findTags(connection, imageData.tags, function(tags, newTags) {
     imageData.tags = tags;
     if (newTags.length > 0) {
       data.push.apply(data, newTags);
     }
-    data.push(new models.Image(imageData));
+
+    var image = new models.Image(imageData);
+    data.push(image);
 
     connection.save(data, function (err) {
-      callback(err);
+      callback(err, image.id);
     });
   })
 }

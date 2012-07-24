@@ -185,3 +185,43 @@ exports.delete = function(req, res) {
   })
 }
 
+exports.upload = function(req, res) {
+  var file = req.files.file;
+
+  var imageData = {
+    title: file.name,
+    referer: "",
+    originalUrl : "",
+    cachedUrl : "",
+    thumbUrl : "",
+    ratio : 1,
+    tags: null
+  }
+
+  utils.copyAndCreateThumb(file, function(err, cachedUrl, thumbUrl, ratio) {
+    imageData.cachedUrl = cachedUrl;
+    imageData.thumbUrl = thumbUrl;
+    imageData.ratio = ratio;
+
+    console.log("Downloaded...", imageData);
+
+    res.setHeader("Content-Type", "text/javascript");
+    var id = -1;
+    if (err != null) {
+      var body = "{0}({1},{2})".format(callback, err, id);
+      res.send(body);
+    }
+    else {
+      db.saveImage(imageData, function(err, imageId) {
+        imageData.id = imageId;
+        res.send(JSON.stringify(imageData));
+      })
+    }
+  })
+
+  //setTimeout(function() {
+  //  res.contentType('application/json');
+  //  res.send({name:file.name, bla:file.path, rnd: Math.random()});
+  //  res.end();
+  //}, Math.floor(Math.random() * 2000));
+}

@@ -59,7 +59,8 @@ function saveCanvasToFile(canvas, file, callback) {
   if (ext == "jpg" || ext == "jpeg") stream = canvas.createJPEGStream({quality:90});
   else if (ext == "png") stream = canvas.createPNGStream();
   else {
-    callback("Uknown image file type. Must be JPEG or PNG.");
+    //by default create jpg stream
+    stream = canvas.createJPEGStream({quality:90});
   }
 
   stream.on('data', function(chunk){
@@ -125,6 +126,32 @@ exports.downloadAndCreateThumb = function(imageFile, callback) {
       callback(err, cachedFile, thumbFile, ratio);
     });
   });
+}
+
+exports.copy = function (src, dst, callback) {
+  var is = fs.createReadStream(src);
+  var os = fs.createWriteStream(dst);
+  util.pump(is, os, callback);
+};
+
+exports.copyAndCreateThumb = function(uploadedImageFile, callback) {
+  var contentImagesPath = path.normalize(__dirname + "/../content/images");
+
+  var ext = path.extname(uploadedImageFile.name);
+  var base = path.basename(uploadedImageFile.name.replace(/\s/g, "-"), ext);
+
+  var timestamp = (new Date()).getTime();
+  var cachedFile = base + "_" + timestamp + ext;
+  var thumbFile = base + "_" + timestamp + "_thumb" + ext;
+
+  var cachedFilePath = contentImagesPath + "/" + cachedFile;
+  var thumbFilePath = contentImagesPath + "/" + thumbFile;
+
+  exports.copy(uploadedImageFile.path, cachedFilePath, function(e) {
+    exports.resizeImage(cachedFilePath, thumbFilePath, 300, 0, function(err, ratio) {
+      callback(err, cachedFile, thumbFile, ratio);
+    });
+  })
 }
 
 exports.deleteImageFile = function(imageFile) {

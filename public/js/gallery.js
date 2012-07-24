@@ -120,7 +120,7 @@ function updateImageData(params) {
 // tags: "gui,webapp"
 // thumbUrl: "content/gui,webapp-4416270ffe79a39ca6ad6feb991cb92e_h.jpg"
 // title: "Mint"
-function addImage(imgInfo) {
+function addImage(imgInfo, prepend) {
   var wrapper = $('<div class="imageWrapper"></div>');
 
   var link = $('<a href="' + inspiration_server + "/images/"+ imgInfo.cachedUrl + '"></a>');
@@ -130,6 +130,46 @@ function addImage(imgInfo) {
 
   var overlay = $('<div class="overlay"></div>');
   wrapper.append(overlay);
+
+  function extractHost(url) {
+    if (!url || url == "") return "Unknown";
+    var slashPosition = url.indexOf("/", url.indexOf("//") + 3);
+    if (slashPosition == -1) slashPosition = url.length;
+    return url.substr(0, slashPosition);
+  }
+
+  //TITLE
+
+  var refererTag = '<a href="{0}" class="refererLink"><h5>{1}</h5></a>';
+  var referer = $(refererTag.format(imgInfo.referer, extractHost(imgInfo.referer)));
+  overlay.append(referer);
+
+  makeContentEditable(
+    referer,
+    function() {
+      var refererUrl = referer.attr("href");
+      referer.data("oldreferer", refererUrl)
+      referer.find("h5").html(refererUrl);
+      selectElement(referer.find("h5"));
+    },
+    function(success) {
+      if (success) {
+        var newReferer = referer.find("h5").text();
+        console.log("Saving new referer...", newReferer, "for image", imgInfo.id);
+        updateImageData({
+          id: imgInfo.id,
+          referer: newReferer
+        })
+        referer.attr("href", newReferer);
+        title.attr("href", newReferer);
+        referer.find("h5").html(extractHost(newReferer));
+      }
+      else {
+        referer.find("h2").text(extractHost(referer.data("oldtitle")));
+      }
+      referer.data("oldtitle", "");
+    }
+  );
 
   //TITLE
 

@@ -24,8 +24,14 @@ a.titleLink {
   display: block;
 }
 
+a.refererLink {
+  color: rgb(170, 170, 170);
+  display: block;
+}
+
 div.linksWrapper.contentEditable,
-a.contentEditable h2 {
+a.contentEditable h2,
+a.contentEditable h5 {
   background: #FFFFDD;
 }
 
@@ -99,6 +105,20 @@ h1 span {
   font-size: 125%;
   font-weight: 100;
 }
+
+.imageWrapper h5 {
+  width: 280px;
+  max-width: 280px;
+  padding: 5px 5px 0px 5px;
+  background: rgba(255, 255, 255, 1);
+  xbackground: black;
+  xcolor: white;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-size: 75%;
+  font-weight: 100;
+}
+
 
 .imageWrapper .linksWrapper {
   width: 280px;

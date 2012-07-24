@@ -114,6 +114,12 @@ exports.update = function(req, res) {
         else res.send("OK");
       });
     }
+    if (req.query.referer) {
+      models.Image.update(connection, Number(imageId), { referer: req.query.referer}, function(err) {
+        if (err) res.send(err);
+        else res.send("OK");
+      });
+    }
     else if (req.query.tags) {
       var updatedTags = req.query.tags.split(",");
       console.log("updatedTags", updatedTags);

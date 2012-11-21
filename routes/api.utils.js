@@ -78,10 +78,12 @@ exports.resizeImage = function(file, targetFile, targetWidth, targetHeight, call
   var start = new Date();
 
   img.onerror = function(err){
+    console.log("err", err);
    callback(err);
   };
 
   img.onload = function(){
+    console.log("wh", img.width, img.height);
     var width = img.width;
     var height = img.height;
 

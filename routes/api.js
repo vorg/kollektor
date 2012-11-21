@@ -1,4 +1,4 @@
-var canvas = require('/Users/vorg/node_modules/canvas/build/Release/canvas.node');
+var canvas = require('canvas');
 var persist = require("persist");
 var type = persist.type;
 var models = require('../models');

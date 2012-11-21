@@ -79,6 +79,15 @@ $(document).ready(function() {
     images.push(addThumb(url, 1, 1));
   });
 
+  //YOUTUBE
+  if (document.location.host == "www.youtube.com") {
+      var videoIDParam = document.location.search.substr(1).split("&")
+        .map(function(u) { return u.split("="); })
+        .filter(function(u) { return u[0] == "v"; });
+      var videoID = videoIDParam[0][1];
+      images.push(addThumb("http://img.youtube.com/vi/" + videoID + "/0.jpg", 480, 360));
+      images.push(addThumb("http://img.youtube.com/vi/" + videoID + "/maxresdefault.jpg", 0, 0));
+  }
 
 
   $("body").prepend(cssReset);

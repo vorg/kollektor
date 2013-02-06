@@ -128,9 +128,18 @@ $(document).ready(function() {
           src = "http://" + document.location.host + src;
         }
         else {
-          var slashIndex = document.location.pathname.lastIndexOf("/");
-          var path = document.location.pathname.substr(0, slashIndex + 1);
-          src = "http://" + document.location.host + path + src;
+          //relative urls
+          var base = "";
+          var baseTags = document.getElementsByTagName("base");
+          if (baseTags.length > 0) {
+            base = baseTags[0].href;
+            src = base + src;
+          }
+          else {
+            var slashIndex = document.location.pathname.lastIndexOf("/");
+            var path = document.location.pathname.substr(0, slashIndex + 1);
+            src = "http://" + document.location.host + path + src;
+          }
         }
       }
       var title = document.title;

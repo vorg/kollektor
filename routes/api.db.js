@@ -13,7 +13,7 @@ exports.findTags = function(connection, tagNames, callback) {
 
   tagNames.forEach(function(tagName) {
     models.Tag.using(connection).where('name = ?', tagName).all(function(err, tag) {
-      if (tag.length > 0) {
+      if (tag && tag.length > 0) {
         tags.push(tag[0]);
       }
       else {

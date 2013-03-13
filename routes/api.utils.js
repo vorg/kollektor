@@ -116,6 +116,11 @@ exports.downloadAndCreateThumb = function(imageFile, callback) {
 
   var ext = path.extname(imageFile);
   var base = path.basename(imageFile, ext);
+  var queryQuestionMarkIndex = ext.indexOf("?");
+  console.log(path, ext, base);
+  if (queryQuestionMarkIndex !== -1) {
+    ext = ext.substr(0, queryQuestionMarkIndex);
+  }
   var timestamp = (new Date()).getTime();
   var cachedFile = base + "_" + timestamp + ext;
 

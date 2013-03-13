@@ -181,3 +181,18 @@ h1 span {
   margin: 25% auto;
   font-size: 300%;
 }
+
+
+
+@media only screen and (max-device-width: 800px) {
+  .imageWrapper {
+    overflow: visible;
+    height: auto !important;
+  }
+
+  .imageWrapper .overlay {
+    display: block;
+    position: inherit;
+    padding: 5px;
+  }
+}

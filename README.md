@@ -1,4 +1,6 @@
-Node.js app for collecting images / inspiration / mood boards.
+NoGUI™ Node.js app for collecting images / inspiration / mood boards.
+
+![Alt text](/public/img/screenshot.jpg "Kollektor")
 
 Brought to you by Marcin Ignac http://marcinignac.com
 

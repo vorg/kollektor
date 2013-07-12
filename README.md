@@ -26,3 +26,7 @@ Visit any website and launch the bookmarket. You should get list of thumbnails a
 Visit your image collection by opening
 
     http://localhost:3000/
+
+To see all your tags with recent images (aka pinterest boards) go to
+
+    http://localhost:3000/tags/

@@ -3,16 +3,16 @@
 
   "dev": {
     "driver": "sqlite3",
-    "filename": "content/inspiration.sqlite"
+    "filename": "content/kollektor.sqlite"
   },
 
   "test": {
     "driver": "sqlite3",
-    "filename": "content/inspiration.sqlite"
+    "filename": "content/kollektor.sqlite"
   },
 
   "prod": {
     "driver": "sqlite3",
-    "filename": "content/inspiration.sqlite"
+    "filename": "content/kollektor.sqlite"
   }
 }

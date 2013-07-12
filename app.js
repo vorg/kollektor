@@ -3,10 +3,24 @@ var routes = require('./routes');
 var fs = require('fs');
 var persist = require('persist');
 
+//Settings
+
+var SERVER_PORT = 3000;
+
+var DB_CONFIG = {
+  'driver': 'sqlite3',
+  'filename': 'content/kollektor.sqlite',
+  'defautFilename': 'content/kollektor.sqlite.default'
+};
+
 // DB Configuration
 
-var databaseSettings = JSON.parse(fs.readFileSync('database.json', 'utf-8'));
-persist.setDefaultConnectOptions(databaseSettings.dev);
+persist.setDefaultConnectOptions(DB_CONFIG);
+
+//check if DB exists and create new one if it doesn't
+if (!fs.existsSync(DB_CONFIG.filename)) {
+  fs.createReadStream(__dirname + '/' + DB_CONFIG.defautFilename).pipe(fs.createWriteStream(__dirname + '/' + DB_CONFIG.filename));
+}
 
 // App Configuration
 
@@ -34,7 +48,6 @@ app.get('/api/latest', routes.api.latest);
 app.get('/tags', routes.tags);
 app.get('/images/*', routes.images);
 
-app.listen(3000, function(){
+app.listen(SERVER_PORT, function(){
   console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
 });
-

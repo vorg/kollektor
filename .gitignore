@@ -1,6 +1,7 @@
 .DS_Store
 public/images
-content/
+content/images/*
+content/*.sqlight
 stuff/
 node_modules/
 *.command

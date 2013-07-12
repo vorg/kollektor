@@ -28,6 +28,7 @@ exports.get = function(req, res) {
     models.Image.using(connection).orderBy('id', 'desc').include("tags").all(function(err, imagesData) {
       var images = [];
       var totalFilteredOut = 0;
+      imagesData = imagesData || [];
       imagesData.forEach(function(imageData) {
         var image = {
           id: imageData.id,

@@ -3,8 +3,9 @@ var http = require("http");
 var url = require("url");
 var fs = require("fs");
 var path = require('path');
-var Canvas = require('canvas');
-var Image = Canvas.Image;
+var gm = require("gm");
+
+var THUMB_WIDTH = 300;
 
 String.prototype.format = function() {
   var args = arguments;
@@ -50,65 +51,15 @@ exports.downloadFile = function(fileUrl, downloadPath, callback) {
   req.end();
 }
 
-function saveCanvasToFile(canvas, file, callback) {
-  var ext = path.extname(file).substr(1).toLowerCase();
-
-  var out = fs.createWriteStream(file)
-  var stream = null;
-
-  if (ext == "jpg" || ext == "jpeg") stream = canvas.createJPEGStream({quality:90});
-  else if (ext == "png") stream = canvas.createPNGStream();
-  else {
-    //by default create jpg stream
-    stream = canvas.createJPEGStream({quality:90});
-  }
-
-  stream.on('data', function(chunk){
-    out.write(chunk);
-  });
-
-  stream.on('end', function(){
-    callback(null, file);
-  });
-
-}
-
-exports.resizeImage = function(file, targetFile, targetWidth, targetHeight, callback) {
-  var img = new Image();
-  var start = new Date();
-
-  img.onerror = function(err){
-    console.log("err", err);
-   callback(err);
-  };
-
-  img.onload = function(){
-    console.log("wh", img.width, img.height);
-    var width = img.width;
-    var height = img.height;
-
-    if (targetWidth != 0) {
-      width = targetWidth;
-      height = img.height * targetWidth / img.width;
-    }
-    else if (targetHeight != 0) {
-      height = targetHeight;
-      width = img.width * targetHeight / img.height;
-    }
-    else {
-      callback("Resizing to with and height at the same time not supported yet.")
-    }
-
-    var canvas = new Canvas(width, height);
-    var ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, width, height);
-
-    saveCanvasToFile(canvas, targetFile, function(err) {
-      callback(err, width/height);
-    });
-  };
-
-  img.src = fs.readFileSync(file);
+exports.resizeImage = function(file, thumb, width, height, callback) {
+  var img = gm(file);
+  img.size(function(err, value) {
+    var ratio = value.width / value.height;
+    img.resize(width).write(thumb, function(e, a) {
+      console.log(e, a);
+      callback(err, ratio);
+    })
+  })
 }
 
 exports.downloadAndCreateThumb = function(imageFile, callback) {
@@ -128,8 +79,9 @@ exports.downloadAndCreateThumb = function(imageFile, callback) {
     var dir = path.dirname(file);
     var thumbFile = base + "_" + timestamp + "_thumb" + ext;
     var thumbFilePath = path.join(dir, thumbFile);
-    exports.resizeImage(file, thumbFilePath, 300, 0, function(err, ratio) {
-      //console.log("Created thumb", err, cachedUrl, thumbUrl, ratio);
+    var img = gm(file);
+    exports.resizeImage(file, thumbFilePath, THUMB_WIDTH, 0, function(err, ratio) {
+      console.log("Created thumb", err, cachedFile, thumbFile, ratio);
       callback(err, cachedFile, thumbFile, ratio);
     });
   });
@@ -155,7 +107,7 @@ exports.copyAndCreateThumb = function(uploadedImageFile, callback) {
   var thumbFilePath = contentImagesPath + "/" + thumbFile;
 
   exports.copy(uploadedImageFile.path, cachedFilePath, function(e) {
-    exports.resizeImage(cachedFilePath, thumbFilePath, 300, 0, function(err, ratio) {
+    exports.resizeImage(cachedFilePath, thumbFilePath, THUMB_WIDTH, 0, function(err, ratio) {
       callback(err, cachedFile, thumbFile, ratio);
     });
   })

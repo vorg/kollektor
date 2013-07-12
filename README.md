@@ -41,7 +41,7 @@ To add images from other websites to to bookmarklet url copy the code and add ne
 Visit any website and launch the bookmarket. You should get list of thumbnails and 2 input fields first is title seconds is space separated list of tags. Click any thumbnail, update title and tags and press 'add' button. Press 'ESC' to close thumbnail list.
 
 
-# Extra
+### Extra
 
 To see all your tags with recent images (aka pinterest boards) go to
 

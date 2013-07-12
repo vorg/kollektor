@@ -182,8 +182,6 @@ h1 span {
   font-size: 300%;
 }
 
-
-
 @media only screen and (max-device-width: 800px) {
   .imageWrapper {
     overflow: visible;

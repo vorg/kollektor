@@ -114,7 +114,7 @@ function updateImageData(params) {
 
 
 // imageInfo {}
-// cachedUrl: "content/"
+// cachedUrl: "content/"plugins
 // orignalUrl: ""
 // referer: "http://haveamint.com/images/screenshots/mint-max-1680x1050.gif"
 // tags: "gui,webapp"
@@ -321,6 +321,22 @@ function addImage(imgInfo, prepend) {
 
   image.width = width;
   image.height = width / imgInfo.ratio;
+
+  //PLUGINS
+
+  image.onload = function() {
+    console.log('Image loaded ' + inspirationPlugins.length)
+    inspirationPlugins.forEach(function(plugin, i) {
+      if (!window.once) window.once = 0;
+      if (window.once++ < 5) {
+        window.once = true;
+        if (!imgInfo.plugindata || !(plugin.name in imgInfo.plugindata)) {
+          console.log('Running', plugin.name, 'on', imgInfo);
+          plugin.run(imgInfo, image, linksWrapper);
+        }
+      }
+    })
+  }
 }
 
 function buildDropZone() {
@@ -405,7 +421,6 @@ $(document).ready(function() {
     function loadMore() {
       var i =0;
       while(i < maxImagesLimit) {
-        console.log(index, i);
         if (index > imagesData.length - 1) break;
         //if (i < startImageIndex) continue;
         var tags = imagesData[index].tags;

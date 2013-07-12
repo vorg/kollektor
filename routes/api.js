@@ -1,4 +1,3 @@
-var canvas = require('canvas');
 var persist = require("persist");
 var type = persist.type;
 var models = require('../models');

@@ -24,7 +24,7 @@ if (!fs.existsSync(DB_CONFIG.filename)) {
 
 // App Configuration
 
-var app = module.exports = express.createServer();
+var app = module.exports = express();
 
 app.configure(function(){
   app.set('views', __dirname + '/views');
@@ -49,5 +49,5 @@ app.get('/tags', routes.tags);
 app.get('/images/*', routes.images);
 
 app.listen(SERVER_PORT, function(){
-  console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+  console.log("Express server listening on port %d in %s mode", SERVER_PORT, app.settings.env);
 });

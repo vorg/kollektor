@@ -194,3 +194,16 @@ h1 span {
     padding: 5px;
   }
 }
+
+@media print {
+  .imageWrapper {
+    overflow: visible;
+    height: auto !important;
+  }
+
+  .imageWrapper .overlay {
+    display: block;
+    position: inherit;
+    padding: 5px;
+  }
+}

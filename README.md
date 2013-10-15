@@ -10,7 +10,12 @@ Download the git repo
 
     git clone git@github.com:vorg/kollektor.git
 
-Install dependencies
+Install native binaries of [graphicsmagick](http://www.graphicsmagick.org)
+
+	//OSX with homebrew
+	brew install graphicsmagick 
+
+Install node dependencies
 
     cd kollector
     npm install

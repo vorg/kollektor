@@ -365,6 +365,20 @@ function buildDropZone() {
     }
   }
 
+  function processLink(link) {
+    console.log("Uploading", link);
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", inspiration_server + "/api/post?img="+link);
+    xhr.send();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4){
+        var imageData = JSON.parse(xhr.response);
+        console.log(imageData);
+        addImage(imageData, true);
+      }
+    };
+  }
+
   var dropzone = $('<div id="dropzone"><p>Drop Images Here</p></div>');
   $("body").append(dropzone);
 
@@ -390,6 +404,11 @@ function buildDropZone() {
     var files = e.target.files || e.dataTransfer.files;
     for(var i=0, f; f = files[i]; i++) {
       processFile(f);
+    }
+
+    var link = e.dataTransfer.getData("text/uri-list");
+    if (link) {
+      processLink(link);
     }
     return false;
   })

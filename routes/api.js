@@ -70,12 +70,12 @@ exports.post = function(req, res) {
 
   var imageData = {
     title: req.query.title || "Unknown",
-    referer: req.query.referer,
+    referer: req.query.referer || "http://unknown",
     originalUrl : req.query.img,
     cachedUrl : "",
     thumbUrl : "",
     ratio : 1,
-    tags: req.query.tags.split(" ")
+    tags: (req.query.tags ? req.query.tags.split(" ") : null)
   }
 
   console.log("Downloading...", imageData);
@@ -90,13 +90,12 @@ exports.post = function(req, res) {
     res.setHeader("Content-Type", "text/javascript");
     var id = -1;
     if (err != null) {
-      var body = "{0}({1},{2})".format(callback, err, id);
-      res.send(body);
+      res.send(JSON.stringify({error:err}));
     }
     else {
-      db.saveImage(imageData, function(err) {
-        var body = "{0}({1},{2})".format(callback, err || "null", id);
-        res.send(body);
+      db.saveImage(imageData, function(err, imageId) {
+        imageData.id = imageId;
+        res.send(JSON.stringify(imageData));
       })
     }
   })

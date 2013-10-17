@@ -97,7 +97,7 @@ exports.post = function(req, res) {
     else {
       db.saveImage(imageData, function(err, imageId) {
         imageData.id = imageId;
-        res.send(JSON.stringify(imageData));
+        res.send('inspiration_callback_1234567890('+JSON.stringify(imageData)+')');
       })
     }
   })

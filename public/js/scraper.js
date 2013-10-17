@@ -177,7 +177,7 @@ $(document).ready(function() {
     var tags = cleanTagText(tagsBox.val());
 
     loaderThumb.fadeIn();
-    xxs(submitUrl, {img:img, referer:referer, title:title, tags:tags, callback:"inspiration_callback_1234567890"});
+    xxs(submitUrl, {img:encodeURIComponent(img), referer:referer, title:title, tags:tags, callback:"inspiration_callback_1234567890"});
   });
 
   loaderThumb.hide();

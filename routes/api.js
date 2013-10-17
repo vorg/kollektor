@@ -71,7 +71,7 @@ exports.post = function(req, res) {
   var imageData = {
     title: req.query.title || "Unknown",
     referer: req.query.referer || "http://unknown",
-    originalUrl : req.query.img,
+    originalUrl : decodeURIComponent(req.query.img),
     cachedUrl : "",
     thumbUrl : "",
     ratio : 1,

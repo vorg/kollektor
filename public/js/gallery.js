@@ -368,7 +368,7 @@ function buildDropZone() {
   function processLink(link) {
     console.log("Uploading", link);
     var xhr = new XMLHttpRequest();
-    xhr.open("GET", inspiration_server + "/api/post?img="+link);
+    xhr.open("GET", inspiration_server + "/api/post?img="+encodeURIComponent(link));
     xhr.send();
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4){

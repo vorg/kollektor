@@ -62,7 +62,9 @@ exports.saveImage = function(imageData, callback) {
       return;
     }
     else {
-      addImage(connection, imageData, callback);
+      addImage(connection, imageData, function(err, imageId) {
+        callback(err, imageId)
+      });
     }
     connection.close();
   });

@@ -78,6 +78,8 @@ exports.post = function(req, res) {
     tags: (req.query.tags ? req.query.tags.split(" ") : null)
   }
 
+  console.log(req.query);
+
   console.log("Downloading...", imageData);
 
   utils.downloadAndCreateThumb(imageData.originalUrl, function(err, cachedUrl, thumbUrl, ratio) {
@@ -217,7 +219,9 @@ exports.upload = function(req, res) {
       res.send(body);
     }
     else {
+      console.log('image saved almost');
       db.saveImage(imageData, function(err, imageId) {
+        console.log('image saved', imageId);
         imageData.id = imageId;
         res.send(JSON.stringify(imageData));
       })

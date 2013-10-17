@@ -4,6 +4,8 @@ var url = require("url");
 var fs = require("fs");
 var path = require('path');
 var gm = require("gm");
+var mime = require("mime-magic");
+var url = require("url");
 
 var THUMB_WIDTH = 300;
 
@@ -54,6 +56,7 @@ exports.downloadFile = function(fileUrl, downloadPath, callback) {
 exports.resizeImage = function(file, thumb, width, height, callback) {
   var img = gm(file);
   img.size(function(err, value) {
+    if (err) console.log('resizeImage', err);
     var ratio = value.width / value.height;
     img.resize(width).write(thumb, function(e, a) {
       console.log(e, a);
@@ -64,25 +67,61 @@ exports.resizeImage = function(file, thumb, width, height, callback) {
 
 exports.downloadAndCreateThumb = function(imageFile, callback) {
   var contentImagesPath = path.normalize(__dirname + "/../content/images");
+  var urlParts = url.parse(imageFile);
+  var urlPath = urlParts.path;
+  var queryPos = urlPath.indexOf('?');
+  var hashPos = urlPath.indexOf('#');
+  var slashSeachEnd = urlPath.length-1;
+  if (queryPos != -1) slashSeachEnd = Math.min(slashSeachEnd, queryPos);
+  if (hashPos != -1) slashSeachEnd = Math.min(slashSeachEnd, hashPos);
+  var lastPathSlash = urlPath.lastIndexOf('/', slashSeachEnd);
+  var requestedFile = urlPath.substr(lastPathSlash+1);
+  var validChars = /[^-_.() abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789]/g
+  var validFile = requestedFile.replace(validChars, '_');
+  var ext = path.extname(validFile)
+  var base = path.basename(validFile, ext);
 
-  var ext = path.extname(imageFile);
-  var base = path.basename(imageFile, ext);
-  var queryQuestionMarkIndex = ext.indexOf("?");
-  console.log(path, ext, base);
-  if (queryQuestionMarkIndex !== -1) {
-    ext = ext.substr(0, queryQuestionMarkIndex);
-  }
-  var timestamp = (new Date()).getTime();
-  var cachedFile = base + "_" + timestamp + ext;
+  var tmpDownloadPath = contentImagesPath + "/00_" + (Date.now() + Math.floor(Math.random()*999999));
 
-  exports.downloadFile(imageFile, contentImagesPath + "/" + cachedFile, function(err, file) {
-    var dir = path.dirname(file);
-    var thumbFile = base + "_" + timestamp + "_thumb" + ext;
-    var thumbFilePath = path.join(dir, thumbFile);
-    var img = gm(file);
-    exports.resizeImage(file, thumbFilePath, THUMB_WIDTH, 0, function(err, ratio) {
-      console.log("Created thumb", err, cachedFile, thumbFile, ratio);
-      callback(err, cachedFile, thumbFile, ratio);
+  exports.downloadFile(imageFile, tmpDownloadPath, function(err, file) {
+    mime(file, function (err, type) {
+      if (err) {
+        console.log('downloadAndCreateThumb', err);
+        callback(err, null, null, 0);
+        fs.unlink(tmpDownloadPath);
+        return;
+      }
+      var typeParts = type.split('/');
+      if (typeParts[0] != 'image') {
+        console.log('downloadAndCreateThumb', 'downloaded file is not an image', type);
+        callback('downloaded file is not an image', null, null, 0);
+        fs.unlink(tmpDownloadPath);
+        return;
+      }
+      if (typeParts[1] == 'jpeg') { typeParts[1] = 'jpg'; }
+
+      var ext = '.' + typeParts[1];
+
+      var timestamp = Date.now();
+      var cachedFile = base + "_" + timestamp + "" + ext;
+      var cachedFilePath = path.join(contentImagesPath, cachedFile);
+      var thumbFile = base + "_" + timestamp + "_thumb" + ext;
+      var thumbFilePath = path.join(contentImagesPath, thumbFile);
+
+      fs.rename(tmpDownloadPath, cachedFilePath, function(err) {
+        if (err) {
+          console.log('downloadAndCreateThumb', 'rename failed');
+          callback('rename failed', null, null, 0);
+          fs.unlink(tmpDownloadPath);
+          fs.unlink(cachedFile);
+          return;
+        }
+        console.log('downloaded', imageFile, 'to', validFile);
+        exports.resizeImage(cachedFilePath, thumbFilePath, THUMB_WIDTH, 0, function(err, ratio) {
+          console.log("Created thumb", err, cachedFile, thumbFile, ratio);
+          callback(err, cachedFile, thumbFile, ratio);
+        });
+      })
     });
   });
 }

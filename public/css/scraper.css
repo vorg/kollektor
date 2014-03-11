@@ -5,8 +5,9 @@
   width: 100%;
   background: #FFF;
   padding: 0 0 1px 0;
-  border-bottom:2px solid black; 
+  border-bottom:2px solid black;
   z-index: 9999999; /*higher than The Verge*/
+  z-index: 2147483647; /*max int in css, go to hell youtube*/
 }
 
 #inspiration3141592653589793 .thumb {
@@ -22,7 +23,6 @@
 #inspiration3141592653589793 .thumb:hover {
   cursor: pointer;
 }
-
 
 #inspiration3141592653589793 .thumb img {
   position: absolute;

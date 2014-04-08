@@ -71,6 +71,20 @@ $(document).ready(function() {
     images.push(addThumb(url, w, h));
   });
 
+  $("iframe").each(function() {
+    var iframe = $(this);
+    iframe.contents().find('img').each(function() {
+      var img = $(this);
+      var w = img.width();
+      var h = img.height();
+      var url = img.attr("src");
+
+      if (w < 64 || h < 64) return;
+
+      images.push(addThumb(url, w, h));
+    })
+  });
+
   console.log(images);
 
   //VIMEO

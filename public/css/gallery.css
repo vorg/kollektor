@@ -182,6 +182,19 @@ h1 span {
   font-size: 300%;
 }
 
+#search {
+  font-size: 200%;
+  position: absolute;
+  top: 30%;
+  min-width: 500px;
+  margin: 0 auto;
+  padding: 1em;
+  min-height: 1.2em;
+  background: rgba(0,0,0,0.8);
+  color: white;
+  border-radius: 0.5em;
+}
+
 @media only screen and (max-device-width: 800px) {
   .imageWrapper {
     overflow: visible;

@@ -91,6 +91,9 @@ function makeContentEditable(element, onStart, onEnd) {
      element.blur();
      onEnd(success);
    }
+
+   e.preventDefault();
+   e.stopPropagation();
  });
 
   element.click(function(e) {
@@ -138,7 +141,7 @@ function addImage(imgInfo, prepend) {
     return url.substr(0, slashPosition);
   }
 
-  //TITLE
+  //URL
 
   var refererTag = '<a href="{0}" class="refererLink"><h5>{1}</h5></a>';
   var refererUrl = imgInfo.referer ? imgInfo.referer : "Unknown"
@@ -414,9 +417,61 @@ function buildDropZone() {
   })
 }
 
+function startSearch() {
+  var searchTerm = '';
+  var searchField = document.createElement('div');
+  document.body.appendChild(searchField);
+  searchField.id = 'search';
+  searchField.style.display = 'none';
+  searchField.style.left = (window.innerWidth - 500)/2 + 'px';
+  window.addEventListener('keydown', function(e) {
+     if (e.keyCode == 27) {
+      searchTerm = '';
+      searchField.textContent = searchTerm;
+      e.preventDefault();
+      searchField.style.display = 'none';
+    }
+  });
+  window.addEventListener('keypress', function(e) {
+    console.log('window.keypress');
+    if (e.keyCode == 8) {
+      searchTerm = searchTerm.substr(0, searchTerm.length-1);
+      searchField.textContent = searchTerm;
+    }
+    else if (e.keyCode == 13) {
+      if (searchTerm[0] == '#') {
+        document.location.href = '/tag/' + searchTerm.substr(1);
+      }
+      else {
+        //document.location.href = '/search/' + searchTerm.substr();
+        $('.imageWrapper').remove();
+        columns.forEach(function(column) {
+          column.height = 0;
+        })
+        console.log('searching for ' + searchTerm);
+        searchTerm = searchTerm.toLowerCase();
+        var images = imagesData.filter(function(imgInfo) {
+          return imgInfo.title.toLowerCase().indexOf(searchTerm) != -1;
+        });
+        console.log(images);
+        images.forEach(addImage);
+        searchField.textContent = searchTerm;
+      }
+    }
+    else {
+      var c = String.fromCharCode(e.charCode != null ? e.charCode : e.keyCode);
+      searchTerm += c;
+    }
+    searchField.textContent = searchTerm;
+    searchField.style.display = 'block';
+    e.preventDefault();
+  });
+}
+
 $(document).ready(function() {
   buildDropZone();
   buildColumns();
+  startSearch();
 
   console.log("getting from " + inspiration_server);
 
@@ -456,21 +511,6 @@ $(document).ready(function() {
         }
         index++;
       }
-
-      //$('.imageWrapper img').css("opacity", 0);
-      //$('.imageWrapper img').bind('appear', function() {
-      //  $(this).attr("src", inspiration_server + $(this).attr("data-src"));
-      //  var img = $(this);
-      //  //setTimeout(function() {
-      //    img.css("opacity", 1);
-      //  //}, 500)
-      //});
-      //$('.imageWrapper img').bind('disappear', function() {
-      //  //$(this).attr("src", null);
-      //  $(this).css("opacity", 0);
-      //});
-//
-      //$('.imageWrapper img').appear(function() {}, {one:false});
     }
 
     loadMore();

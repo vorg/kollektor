@@ -418,6 +418,7 @@ function buildDropZone() {
 }
 
 function startSearch() {
+  return;
   var searchTerm = '';
   var searchField = document.createElement('div');
   document.body.appendChild(searchField);
@@ -425,7 +426,10 @@ function startSearch() {
   searchField.style.display = 'none';
   searchField.style.left = (window.innerWidth - 500)/2 + 'px';
   window.addEventListener('keydown', function(e) {
-     if (e.keyCode == 27) {
+    return;
+    console.log('window.keydown', document.activeElement);
+    if (e.keyCode == 27) {
+      document.body.blur();
       searchTerm = '';
       searchField.textContent = searchTerm;
       e.preventDefault();
@@ -433,7 +437,9 @@ function startSearch() {
     }
   });
   window.addEventListener('keypress', function(e) {
-    console.log('window.keypress');
+    console.log('window.keypress', document.activeElement);
+    return;
+    if (document.activeElement == document.body) return;
     if (e.keyCode == 8) {
       searchTerm = searchTerm.substr(0, searchTerm.length-1);
       searchField.textContent = searchTerm;
@@ -443,19 +449,7 @@ function startSearch() {
         document.location.href = '/tag/' + searchTerm.substr(1);
       }
       else {
-        //document.location.href = '/search/' + searchTerm.substr();
-        $('.imageWrapper').remove();
-        columns.forEach(function(column) {
-          column.height = 0;
-        })
-        console.log('searching for ' + searchTerm);
-        searchTerm = searchTerm.toLowerCase();
-        var images = imagesData.filter(function(imgInfo) {
-          return imgInfo.title.toLowerCase().indexOf(searchTerm) != -1;
-        });
-        console.log(images);
-        images.forEach(addImage);
-        searchField.textContent = searchTerm;
+        document.location.href = '/s/' + searchTerm;
       }
     }
     else {
@@ -476,6 +470,8 @@ $(document).ready(function() {
   console.log("getting from " + inspiration_server);
 
   var path = document.location.pathname;
+
+  console.log(path);
 
   $.get(inspiration_server + "/api/get" + path, function(data) {
     console.log("got! " + data.length);

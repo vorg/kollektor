@@ -7,7 +7,7 @@ var gm = require("gm");
 var mime = require("mime-magic");
 var url = require("url");
 
-var THUMB_WIDTH = 300;
+var THUMB_WIDTH = 600;
 
 String.prototype.format = function() {
   var args = arguments;

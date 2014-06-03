@@ -66,7 +66,7 @@ $(document).ready(function() {
     var h = img.height();
     var url = img.attr("src");
 
-    if (w < 64 || h < 64) return;
+    if (w <= 100 || h <= 100) return;
 
     images.push(addThumb(url, w, h));
   });
@@ -79,7 +79,7 @@ $(document).ready(function() {
       var h = img.height();
       var url = img.attr("src");
 
-      if (w < 64 || h < 64) return;
+      if (w <= 100 || h <= 100) return;
 
       images.push(addThumb(url, w, h));
     })

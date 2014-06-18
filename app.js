@@ -37,6 +37,7 @@ app.configure(function(){
 
 app.get('/', routes.index);
 app.get('/tag/*', routes.index);
+app.get('/s/*', routes.index);
 app.get('/bookmarklet', routes.bookmarklet);
 app.get('/api/get/*', routes.api.get);
 app.get('/api/post', routes.api.post);

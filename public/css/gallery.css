@@ -184,7 +184,7 @@ h1 span {
 
 #search {
   font-size: 200%;
-  position: absolute;
+  position: fixed;
   top: 30%;
   min-width: 500px;
   margin: 0 auto;

@@ -92,8 +92,8 @@ function makeContentEditable(element, onStart, onEnd) {
      onEnd(success);
    }
 
-   e.preventDefault();
-   e.stopPropagation();
+   //e.preventDefault();
+   //e.stopPropagation();
  });
 
   element.click(function(e) {
@@ -227,7 +227,9 @@ function addImage(imgInfo, prepend) {
   function tagsToLinks(tags) {
     var numLinks = 0;
     linksWrapper.html("");
-    $(tags).each(function() {
+    $(tags)
+    //.filter(function(tag) { return this.indexOf('p-') !== 0; })
+    .each(function() {
       var tag = this;
       if (numLinks++ > 0) linksWrapper.append(", ");
       var tagLink = $('<a href="'+inspiration_server+'/tag/'+tag+'">'+tag+'</a>');
@@ -418,7 +420,6 @@ function buildDropZone() {
 }
 
 function startSearch() {
-  return;
   var searchTerm = '';
   var searchField = document.createElement('div');
   document.body.appendChild(searchField);
@@ -426,8 +427,6 @@ function startSearch() {
   searchField.style.display = 'none';
   searchField.style.left = (window.innerWidth - 500)/2 + 'px';
   window.addEventListener('keydown', function(e) {
-    return;
-    console.log('window.keydown', document.activeElement);
     if (e.keyCode == 27) {
       document.body.blur();
       searchTerm = '';
@@ -437,9 +436,8 @@ function startSearch() {
     }
   });
   window.addEventListener('keypress', function(e) {
-    console.log('window.keypress', document.activeElement);
-    return;
-    if (document.activeElement == document.body) return;
+    if (e.metaKey || e.ctrlKey) return;
+    if (document.activeElement != document.body) return;
     if (e.keyCode == 8) {
       searchTerm = searchTerm.substr(0, searchTerm.length-1);
       searchField.textContent = searchTerm;
@@ -448,17 +446,17 @@ function startSearch() {
       if (searchTerm[0] == '#') {
         document.location.href = '/tag/' + searchTerm.substr(1);
       }
-      else {
+      else if (searchTerm.length > 0) {
         document.location.href = '/s/' + searchTerm;
       }
     }
     else {
       var c = String.fromCharCode(e.charCode != null ? e.charCode : e.keyCode);
       searchTerm += c;
+      searchField.textContent = searchTerm;
+      searchField.style.display = 'block';
+      e.preventDefault();
     }
-    searchField.textContent = searchTerm;
-    searchField.style.display = 'block';
-    e.preventDefault();
   });
 }
 
@@ -470,8 +468,6 @@ $(document).ready(function() {
   console.log("getting from " + inspiration_server);
 
   var path = document.location.pathname;
-
-  console.log(path);
 
   $.get(inspiration_server + "/api/get" + path, function(data) {
     console.log("got! " + data.length);

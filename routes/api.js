@@ -14,12 +14,16 @@ exports.get = function(req, res) {
 
     var options = req.originalUrl.replace("/api/get", "").split("/");
     var tagsFilter = null;
+    var searchFilter = null;
 
     var i = 0;
     while(options.length > 0) {
       var option = options.shift();
       if (option == "tag") {
         tagsFilter = unescape(options.shift()).split("+");
+      }
+       if (option == "s") {
+        searchFilter = unescape('' + options.shift()).replace(/\+/g, ' ').toLowerCase();
       }
     }
 
@@ -49,6 +53,10 @@ exports.get = function(req, res) {
         });
 
         if (tagsFilter && hasTags != tagsFilter.length) {
+          filteredOut = true;
+          totalFilteredOut++;
+        }
+        else if (searchFilter && (image.title.toLowerCase().indexOf(searchFilter) == -1 && (image.referer || '').toLowerCase().indexOf(searchFilter) == -1)) {
           filteredOut = true;
           totalFilteredOut++;
         }

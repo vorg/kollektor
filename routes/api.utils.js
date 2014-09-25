@@ -129,7 +129,8 @@ exports.downloadAndCreateThumb = function(imageFile, callback) {
 exports.copy = function (src, dst, callback) {
   var is = fs.createReadStream(src);
   var os = fs.createWriteStream(dst);
-  util.pump(is, os, callback);
+  is.pipe(os);
+  is.on('end', callback);
 };
 
 exports.copyAndCreateThumb = function(uploadedImageFile, callback) {

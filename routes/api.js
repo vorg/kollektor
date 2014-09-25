@@ -223,7 +223,8 @@ exports.upload = function(req, res) {
     res.setHeader("Content-Type", "text/javascript");
     var id = -1;
     if (err != null) {
-      var body = "{0}({1},{2})".format(callback, err, id);
+      console.log('ERROR upload:', err);
+      var body = "({1},{2})".format(err, id);
       res.send(body);
     }
     else {

@@ -56,12 +56,20 @@ exports.downloadFile = function(fileUrl, downloadPath, callback) {
 exports.resizeImage = function(file, thumb, width, height, callback) {
   var img = gm(file);
   img.size(function(err, value) {
-    if (err) console.log('resizeImage', err);
-    var ratio = value.width / value.height;
-    img.resize(width).write(thumb, function(e, a) {
-      console.log(e, a);
-      callback(err, ratio);
-    })
+    if (err) {
+      console.log('ERROR resizeImage', err);
+      exports.copy(file, thumb, function(copyErr) {
+        var ratio = 1;
+        callback(copyErr, ratio);
+      })
+    }
+    else {
+      var ratio = value.width / value.height;
+      img.resize(width).write(thumb, function(e, a) {
+        console.log(e, a);
+        callback(err, ratio);
+      })
+    }
   })
 }
 

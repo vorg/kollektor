@@ -19,7 +19,7 @@ persist.setDefaultConnectOptions(DB_CONFIG);
 
 //check if DB exists and create new one if it doesn't
 if (!fs.existsSync(DB_CONFIG.filename)) {
-  fs.createReadStream(__dirname + '/' + DB_CONFIG.defautFilename).pipe(fs.createWriteStream(__dirname + '/' + DB_CONFIG.filename));
+  //fs.createReadStream(__dirname + '/' + DB_CONFIG.defautFilename).pipe(fs.createWriteStream(__dirname + '/' + DB_CONFIG.filename));
 }
 
 // App Configuration

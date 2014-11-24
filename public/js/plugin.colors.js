@@ -1,83 +1,40 @@
 var inspirationPlugins = inspirationPlugins || [];
 
 (function() {
-  function Octree(x, y, z, w, h, d) {
-      this.root = new Octree.Cell(x, y, z, w, h, d, 0);
-    }
+    function run(imgInfo, img, linksWrapper) {
+      var url = '/images/' + imgInfo.thumbUrl;
+      var hash = url + '_2';
 
-    Octree.MaxLevel = 4;
+      console.log('palette', url)
 
-    //p = {x, y}
-    Octree.prototype.add = function(p) {
-      this.root.add(p);
-    }
+      function addColors(colors) {
+        var imgWrapper = linksWrapper.parent().parent().find('a').eq(0);
+        console.log(imgWrapper)
+        var img = imgWrapper.find('img').get(0);
+        if (!img) return;
+        imgWrapper.css('height', parseInt(imgWrapper.css('height')) + 5);
+        var totalPx = colors.reduce(function(sum, color) { return sum + color[1]}, 0);
+        //totalPx -= 5 * colors.length;
+        colors.forEach(function(color) {
+          var w = img.width;
+          var h = Math.floor(img.height * color[1] / totalPx);
+          var colorLink = $('<div style="width:'+w+'px;height:'+h+'px; float: left;background:' + color[0] + '"></div>');
+          imgWrapper.prepend(colorLink);
+        })
+        imgWrapper.find('img').eq(0).remove();
+      }
 
-    Octree.Cell = function(x, y, z, w, h, d, level) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-      this.w = w;
-      this.h = h;
-      this.d = d;
-      this.level = level;
-      this.points = [];
-      this.children = [];
-    }
-
-    Octree.Cell.prototype.add = function(p) {
-      this.points.push(p);
-
-      if (this.children.length > 0) {
-        this.addToChildren(p);
+      if (!localStorage[hash]) {
+        Palette.fromImage(url, function(err, colors) {
+          var htmlColors = colors.map(function(c) { return [c.color.getHex(), c.numPoints] });
+          localStorage[hash] = JSON.stringify(htmlColors);
+          addColors(htmlColors);
+        })
       }
       else {
-        if (this.points.length > 1 && this.level < Octree.MaxLevel) {
-          this.split();
-        }
+        addColors(JSON.parse(localStorage[hash]));
       }
-    }
-
-    Octree.Cell.prototype.addToChildren = function(p) {
-      for(var i=0; i<this.children.length; i++) {
-        if (this.children[i].contains(p)) {
-          this.children[i].add(p);
-          break;
-        }
-      }
-    }
-
-    Octree.Cell.prototype.contains = function(p) {
-      return p.x >= this.x && p.y >= this.y && p.z >= this.z && p.x <= this.x + this.w && p.y <= this.y + this.h && p.z <= this.z + this.d;
-    }
-
-    // 1 2 3 4
-    // 5 6 7 8
-    Octree.Cell.prototype.split = function() {
-      var x = this.x;
-      var y = this.y;
-      var z = this.z;
-      var w2 = this.w/2;
-      var h2 = this.h/2;
-      var d2 = this.d/2;
-
-      this.children.push(new Octree.Cell(x, y, z, w2, h2, d2, this.level + 1));
-      this.children.push(new Octree.Cell(x + w2, y, z, w2, h2, d2, this.level + 1));
-      this.children.push(new Octree.Cell(x, y, z + d2, w2, h2, d2, this.level + 1));
-      this.children.push(new Octree.Cell(x + w2, y, z + d2, w2, h2, d2, this.level + 1));
-      this.children.push(new Octree.Cell(x, y + h2, z, w2, h2, d2, this.level + 1));
-      this.children.push(new Octree.Cell(x + w2, y + h2, z, w2, h2, d2, this.level + 1));
-      this.children.push(new Octree.Cell(x, y + h2, z + d2, w2, h2, d2, this.level + 1));
-      this.children.push(new Octree.Cell(x + w2, y + h2, z + d2, w2, h2, d2, this.level + 1));
-
-      for(var i=0; i<this.points.length; i++) {
-        this.addToChildren(this.points[i]);
-      }
-    }
-
-    function run(imgInfo, img, linksWrapper) {
-      console.log('Colors RUNNING!', imgInfo.title);
-      var colorLink = $('<a href="#" class="optionsLink">￭</a>');
-      linksWrapper.append(',', colorLink);
+      //console.log('Colors RUNNING!', imgInfo.title);
     }
 
     var colorsPlugin = {

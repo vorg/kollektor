@@ -6,6 +6,8 @@ var columnWidth = thumbWidth + columnMargin;
 var columns = [];
 var imagesData;
 
+var images = [];
+
 String.prototype.format = function() {
   var args = arguments;
   return this.replace(/{(\d+)}/g, function(match, number) {
@@ -330,18 +332,27 @@ function addImage(imgInfo, prepend) {
   //PLUGINS
 
   image.onload = function() {
-    console.log('Image loaded ' + inspirationPlugins.length)
-    inspirationPlugins.forEach(function(plugin, i) {
-      if (!window.once) window.once = 0;
-      if (window.once++ < 5) {
-        window.once = true;
-        if (!imgInfo.plugindata || !(plugin.name in imgInfo.plugindata)) {
-          console.log('Running', plugin.name, 'on', imgInfo);
-          plugin.run(imgInfo, image, linksWrapper);
-        }
-      }
+    images.push({
+      imgInfo: imgInfo,
+      image: image,
+      linksWrapper: linksWrapper
     })
   }
+}
+
+function runPlugin(name) {
+  inspirationPlugins.forEach(function(plugin, i) {
+    if (plugin.name != name) return;
+    images.forEach(function(img) {
+      var imgInfo = img.imgInfo;
+      var image = img.image;
+      var linksWrapper = img.linksWrapper;
+       if (!imgInfo.plugindata || !(plugin.name in imgInfo.plugindata)) {
+        console.log('Running', plugin.name, 'on', imgInfo);
+        plugin.run(imgInfo, image, linksWrapper);
+      }
+    })
+  })
 }
 
 function buildDropZone() {
@@ -445,6 +456,15 @@ function startSearch() {
     else if (e.keyCode == 13) {
       if (searchTerm[0] == '#') {
         document.location.href = '/tag/' + searchTerm.substr(1);
+      }
+      else if (searchTerm[0] == '/') {
+        var pluginName = searchTerm.substr(1);
+        runPlugin(pluginName);
+        document.body.blur();
+        searchTerm = '';
+        searchField.textContent = searchTerm;
+        e.preventDefault();
+        searchField.style.display = 'none';
       }
       else if (searchTerm.length > 0) {
         document.location.href = '/s/' + searchTerm;

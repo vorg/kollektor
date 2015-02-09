@@ -2,10 +2,11 @@ var express = require('express');
 var routes = require('./routes');
 var fs = require('fs');
 var persist = require('persist');
+var bodyParser = require('body-parser');
 
 //Settings
 
-var SERVER_PORT = 3000;
+var SERVER_PORT = 3002;
 
 var DB_CONFIG = {
   'driver': 'sqlite3',
@@ -19,21 +20,18 @@ persist.setDefaultConnectOptions(DB_CONFIG);
 
 //check if DB exists and create new one if it doesn't
 if (!fs.existsSync(DB_CONFIG.filename)) {
-  //fs.createReadStream(__dirname + '/' + DB_CONFIG.defautFilename).pipe(fs.createWriteStream(__dirname + '/' + DB_CONFIG.filename));
+  fs.createReadStream(__dirname + '/' + DB_CONFIG.defautFilename).pipe(fs.createWriteStream(__dirname + '/' + DB_CONFIG.filename));
 }
 
 // App Configuration
 
 var app = module.exports = express();
 
-app.configure(function(){
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'jade');
-  app.set('view options', { layout: false, pretty: true });  
-  app.use(express.bodyParser());
-  //app.use(app.router); //no idea what this does
-  app.use(express.static(__dirname + '/public'));
-});
+app.set('views', __dirname + '/views');
+app.set('view engine', 'jade');
+app.set('view options', { layout: false, pretty: true });
+app.use(bodyParser.json());
+app.use(express.static(__dirname + '/public'));
 
 app.get('/', routes.index);
 app.get('/tag/*', routes.index);
@@ -48,6 +46,9 @@ app.get('/api/tags', routes.api.tags);
 app.get('/api/latest', routes.api.latest);
 app.get('/tags', routes.tags);
 app.get('/images/*', routes.images);
+app.get('/js/config.js', function(req, res) {
+  res.send('var inspiration_server = "http://localhost:'+SERVER_PORT+'"; var inspiration_tags = ""');
+})
 
 app.listen(SERVER_PORT, function(){
   console.log("Express server listening on port %d in %s mode", SERVER_PORT, app.settings.env);

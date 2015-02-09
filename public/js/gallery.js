@@ -465,12 +465,16 @@ $(document).ready(function() {
   buildColumns();
   startSearch();
 
-  console.log("getting from " + inspiration_server);
-
-  var path = document.location.pathname;
+  var path = document.location.pathname || "";
 
   $.get(inspiration_server + "/api/get" + path, function(data) {
-    console.log("got! " + data.length);
+    if (data && data.length > 0) {
+      console.log("got! " + data.length);
+    }
+    else {
+      document.querySelector('#dropzone').setAttribute('class','active');
+      return;
+    }
     imagesData = data;
     if (inspiration_tags) {
       $("h1").append("<span> / " + inspiration_tags + "</span>");

@@ -49,6 +49,10 @@ h1 span {
   font-weight: 100;
 }
 
+.centered {
+  text-align: center;
+}
+
 .column {
   width: 300px;
   margin: 10px 0 0 10px;
@@ -171,6 +175,10 @@ h1 span {
   text-align: center;
   background: rgba(255, 255, 0, 0.85);
   display: none;
+}
+
+#dropzone.active {
+  display: block;
 }
 
 #dropzone.hover {

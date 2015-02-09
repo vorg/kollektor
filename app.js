@@ -6,7 +6,7 @@ var bodyParser = require('body-parser');
 
 //Settings
 
-var SERVER_PORT = 3002;
+var SERVER_PORT = 3000;
 
 var DB_CONFIG = {
   'driver': 'sqlite3',

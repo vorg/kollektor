@@ -2,7 +2,8 @@ var express = require('express');
 var routes = require('./routes');
 var fs = require('fs');
 var persist = require('persist');
-var bodyParser = require('body-parser');
+var multipart = require('connect-multiparty');
+var multipartMiddleware = multipart();
 
 //Settings
 
@@ -30,7 +31,6 @@ var app = module.exports = express();
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.set('view options', { layout: false, pretty: true });
-app.use(bodyParser.json());
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', routes.index);
@@ -40,7 +40,7 @@ app.get('/bookmarklet', routes.bookmarklet);
 app.get('/api/get/*', routes.api.get);
 app.get('/api/post', routes.api.post);
 app.get('/api/update', routes.api.update);
-app.post('/api/upload', routes.api.upload);
+app.post('/api/upload', multipartMiddleware, routes.api.upload);
 app.get('/api/delete', routes.api.delete);
 app.get('/api/tags', routes.api.tags);
 app.get('/api/latest', routes.api.latest);

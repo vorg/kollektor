@@ -360,15 +360,26 @@ function runPlugin(name) {
     console.log('runPlugin', name);
   inspirationPlugins.forEach(function(plugin, i) {
     if (plugin.name != name) return;
-    images.forEach(function(img) {
-      var imgInfo = img.imgInfo;
-      var image = img.image;
-      var linksWrapper = img.linksWrapper;
-       if (!imgInfo.plugindata || !(plugin.name in imgInfo.plugindata)) {
-        console.log('Running', plugin.name, 'on', imgInfo);
-        plugin.run(imgInfo, image, linksWrapper);
-      }
-    })
+
+    var todo = images.slice(0);
+
+    function next() {
+        var img = todo.shift();
+        if (!img) { return; }
+
+        var imgInfo = img.imgInfo;
+        var image = img.image;
+        var linksWrapper = img.linksWrapper;
+        if (!imgInfo.plugindata || !(plugin.name in imgInfo.plugindata)) {
+          console.log('Running', plugin.name, 'on', imgInfo);
+          plugin.run(imgInfo, image, linksWrapper, next);
+        }
+        else {
+            next();
+        }
+    }
+
+    next();
   })
 }
 

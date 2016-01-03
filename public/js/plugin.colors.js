@@ -74,10 +74,39 @@ var inspirationPlugins = inspirationPlugins || [];
       }
     }
 
-    function run(imgInfo, img, linksWrapper) {
+    function prop(name) {
+        return function(o) {
+            return o[name];
+        }
+    }
+
+    function sum(a, b) {
+        return a + b;
+    }
+
+    function run(imgInfo, img, linksWrapper, callback) {
       console.log('Colors RUNNING!', imgInfo.title);
       var colorLink = $('<a href="#" class="optionsLink">￭</a>');
+      Palette.fromImage(img.src, function(err, colors) {
+
+          var totalPoints = colors.map(prop('numPoints')).reduce(sum, 0);
+          var w = img.width;
+          var h = img.height;
+          colors.forEach(function(o) {
+              var colorW = Math.floor(w * o.numPoints / totalPoints);
+              var div = document.createElement('div');
+              div.style.float = 'left';
+              div.style.width = colorW + 'px';
+              div.style.height = h + 'px';
+              div.style.background = o.color.getHex();
+              img.parentNode.appendChild(div);
+          })
+          img.parentNode.removeChild(img);
+      })
       linksWrapper.append(',', colorLink);
+
+      imgInfo.plugindata.colors = colors;
+      setTimeout(callback, 500);
     }
 
     var colorsPlugin = {

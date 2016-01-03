@@ -15,6 +15,7 @@ exports.get = function(req, res) {
     var options = req.originalUrl.replace("/api/get", "").split("/");
     var tagsFilter = null;
     var searchFilter = null;
+    var complexityFilter = null;
 
     var i = 0;
     while(options.length > 0) {
@@ -22,7 +23,10 @@ exports.get = function(req, res) {
       if (option == "tag") {
         tagsFilter = unescape(options.shift()).split("+");
       }
-       if (option == "s") {
+      if (option == "complexity") {
+        complexityFilter = unescape(options.shift());
+      }
+      if (option == "s") {
         searchFilter = unescape('' + options.shift()).replace(/\+/g, ' ').toLowerCase();
       }
     }
@@ -41,6 +45,7 @@ exports.get = function(req, res) {
           cachedUrl : imageData.cachedUrl,
           thumbUrl : imageData.thumbUrl,
           ratio : imageData.ratio,
+          complexity : imageData.complexity,
           tags: []
         }
         var hasTags = 0;
@@ -53,6 +58,10 @@ exports.get = function(req, res) {
         });
 
         if (tagsFilter && hasTags != tagsFilter.length) {
+          filteredOut = true;
+          totalFilteredOut++;
+        }
+        else if (complexityFilter && imageData.complexity != complexityFilter) {
           filteredOut = true;
           totalFilteredOut++;
         }
@@ -83,6 +92,7 @@ exports.post = function(req, res) {
     cachedUrl : "",
     thumbUrl : "",
     ratio : 1,
+    complexity: 0,
     tags: (req.query.tags ? req.query.tags.split(" ") : null)
   }
 
@@ -210,6 +220,7 @@ exports.upload = function(req, res) {
     cachedUrl : "",
     thumbUrl : "",
     ratio : 1,
+    complexity: 0,
     tags: null
   }
 

@@ -35,9 +35,9 @@ function imageExists(connection, originalUrl, callback) {
 }
 
 function addImage(connection, imageData, callback) {
-  var data = [];
-  console.log("finding", imageData.tags);
 
+  var data = [];
+  //console.log("finding", imageData.tags);
 
   exports.findTags(connection, imageData.tags, function(tags, newTags) {
     imageData.tags = tags;
@@ -53,6 +53,8 @@ function addImage(connection, imageData, callback) {
     });
   })
 }
+
+exports.addImage = addImage;
 
 
 exports.saveImage = function(imageData, callback) {

@@ -19,6 +19,7 @@ var DB_CONFIG = {
 
 persist.setDefaultConnectOptions(DB_CONFIG);
 
+
 //check if DB exists and create new one if it doesn't
 if (!fs.existsSync(DB_CONFIG.filename)) {
   fs.createReadStream(__dirname + '/' + DB_CONFIG.defautFilename).pipe(fs.createWriteStream(__dirname + '/' + DB_CONFIG.filename));
@@ -35,6 +36,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/', routes.index);
 app.get('/tag/*', routes.index);
+app.get('/complexity/*', routes.index);
 app.get('/s/*', routes.index);
 app.get('/bookmarklet', routes.bookmarklet);
 app.get('/api/get/*', routes.api.get);

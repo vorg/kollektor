@@ -36,6 +36,9 @@ exports.get = function(req, res) {
       var images = [];
       var totalFilteredOut = 0;
       imagesData = imagesData || [];
+      if (imagesData.length == 0) {
+        res.send(JSON.stringify(images));
+      };
       imagesData.forEach(function(imageData) {
         var image = {
           id: imageData.id,

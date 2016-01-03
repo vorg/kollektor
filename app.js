@@ -19,6 +19,9 @@ var DB_CONFIG = {
 
 persist.setDefaultConnectOptions(DB_CONFIG);
 
+if (!fs.existsSync(__dirname + '/content/images')) {
+  fs.mkdir(__dirname + '/content/images');
+}
 
 //check if DB exists and create new one if it doesn't
 if (!fs.existsSync(DB_CONFIG.filename)) {

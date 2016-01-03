@@ -9,5 +9,6 @@ module.exports = persist.define("Image", {
   "originalUrl": type.STRING,  
   "cachedUrl": type.STRING,
   "thumbUrl": type.STRING,
-  "ratio": type.REAL
+  "ratio": type.REAL,
+  "complexity": type.REAL,
 }).hasMany(Tag, { through:'images_tags' });

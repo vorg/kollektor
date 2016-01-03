@@ -39,6 +39,7 @@ app.use(express.static(__dirname + '/public'));
 
 app.get('/', routes.index);
 app.get('/tag/*', routes.index);
+app.get('/complexity/*', routes.index);
 app.get('/s/*', routes.index);
 app.get('/bookmarklet', routes.bookmarklet);
 app.get('/api/get/*', routes.api.get);

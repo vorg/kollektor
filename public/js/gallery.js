@@ -254,10 +254,11 @@ function addImage(imgInfo, prepend) {
 
     var deleteLink = $('<a href="#" class="optionsLink">delete</a>');
     deleteLink.click(deleteImage);
-    var complexityLink = $('<a href="'+inspiration_server+'/complexity/'+imgInfo.complexity+'">' + imgInfo.complexity +'</a>');
-    var idLink = $('<a href="#">#' + imgInfo.id +'</a>');
+    //var complexityLink = $('<a href="'+inspiration_server+'/complexity/'+imgInfo.complexity+'">' + imgInfo.complexity +'</a>');
+    //var idLink = $('<a href="#">#' + imgInfo.id +'</a>');
 
-    linksWrapper.append(", ", refreshLink, ", ", deleteLink, ',', complexityLink, ',', idLink);
+    //linksWrapper.append(", ", refreshLink, ", ", deleteLink, ',', complexityLink, ',', idLink);
+    linksWrapper.append(", ", refreshLink, ", ", deleteLink);
   }
 
   tagsToLinks(imgInfo.tags);

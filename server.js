@@ -67,11 +67,15 @@ scanDir(dir, (err, items) => {
 function startServer (items) {
   var app = express()
 
-  app.get('/', function (req, res) {
+  app.get('/', (req, res) => {
     res.send('Hello World! ' + items.length)
   })
 
-  app.listen(port, function () {
+  app.get('/api/get/*', (req, res) => {
+    res.send(JSON.stringify(items))
+  })
+
+  app.listen(port, () => {
     log(`Starting on port http://localhost:${port}`)
   })
 }

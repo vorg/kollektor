@@ -79,6 +79,13 @@ persist.connect(function (err, connection) {
         return
       }
       var data = {
+        // Here we use created as we know files were added by collector so the time
+        // is increasing as we add new files. However if we now add support for
+        // just dragging files into a folder, then we probably should use the date from json
+        // or the date when the json was created. This will bring another problem when uploading files: 
+        // how to detect if file was uploaded and we are about to create json file immediately with user suplied data
+        // or somebody just put a new file into a folder and we have create json file ourselves with default data.
+        added: stat.ctime.toISOString(),
         title: imageData.title || '',
         referer: imageData.referer || '',
         original: imageData.originalUrl || '',

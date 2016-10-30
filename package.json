@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "body-parser": "^1.11.0",
+    "commander": "^2.9.0",
     "connect-multiparty": "^1.2.5",
     "express": "^4.11.2",
     "gm": "^1.9.2",

@@ -16,6 +16,9 @@ const pacakge = require('./package.json')
 const express = require('express')
 const debug = require('debug')
 const scanDir = require('./lib/scan-dir')
+const path = require('path')
+const url = require('url')
+const browserify = require('browserify')
 
 // Initialize logger
 debug.enable('kollektor')
@@ -67,12 +70,33 @@ scanDir(dir, (err, items) => {
 function startServer (items) {
   var app = express()
 
+  app.use(express.static(__dirname + '/public'))
+
+  app.get('/client.bundle.js', (req, res) => {
+    var b = browserify()
+    b.add(__dirname + '/client.js')
+    b.bundle((err, buf) => {
+      if (err) {
+        log('Client bundle error', err)
+        res.end()
+      } else {
+        res.send(buf)
+      }
+    })
+  })
+
   app.get('/', (req, res) => {
     res.send('Hello World! ' + items.length)
   })
 
   app.get('/api/get/*', (req, res) => {
     res.send(JSON.stringify(items))
+  })
+
+  app.get('/images/*', (req, res) => {
+    var filePath = path.relative('/images', url.parse(req.path).pathname)
+    filePath = path.normalize(dir + '/' + filePath)
+    res.sendFile(filePath)
   })
 
   app.listen(port, () => {

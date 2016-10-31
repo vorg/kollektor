@@ -70,8 +70,10 @@ scanDir(dir, (err, items) => {
 function startServer (items) {
   var app = express()
 
+  // Serve root path / from public folder with static assets (html, css)
   app.use(express.static(__dirname + '/public'))
 
+  // Client web interface code is bundled on the fly. This probably shouldn't go into production.
   app.get('/client.bundle.js', (req, res) => {
     var b = browserify()
     b.add(__dirname + '/client.js')
@@ -85,20 +87,19 @@ function startServer (items) {
     })
   })
 
-  app.get('/', (req, res) => {
-    res.send('Hello World! ' + items.length)
-  })
-
+  // API for getting all items currently in the db
   app.get('/api/get/*', (req, res) => {
     res.send(JSON.stringify(items))
   })
 
+  // Serve individual image files from the given path
   app.get('/images/*', (req, res) => {
     var filePath = path.relative('/images', url.parse(req.path).pathname)
     filePath = path.normalize(dir + '/' + filePath)
     res.sendFile(filePath)
   })
 
+  // Start the server on a given port
   app.listen(port, () => {
     log(`Starting on port http://localhost:${port}`)
   })

@@ -5,48 +5,46 @@ const debug = require('debug')
 debug.enable('kollektor-client')
 const log = debug('kollektor-client')
 
-function extractHost(url) {
-  if (!url || url == "") return "Unknown"
-  var slashPosition = url.indexOf("/", url.indexOf("//") + 3)
-  if (slashPosition == -1) slashPosition = url.length
+function extractHost (url) {
+  if (!url || url === '') return 'Unknown'
+  var slashPosition = url.indexOf('/', url.indexOf('//') + 3)
+  if (slashPosition === -1) slashPosition = url.length
   return url.substr(0, slashPosition)
 }
 
 log('Trying to request items')
 request.json('api/get/', (err, items) => {
   log('Items', err, items)
+  items = items.reverse()
 
-  const columns = [[], [], [], [], []]
-  const columnsHeights = [0, 0, 0, 0, 0]
   const numColumns = 5
+  const columns = []
+
+  for (let i = 0; i < numColumns; i++) {
+    columns.push({ items: [], height: 0 })
+  }
 
   items = items.slice(0, 100)
 
   function findMinColumn () {
-    let minIndex = 0
-    let minHeight = columnsHeights[0]
-    for (let i = 1; i < columns.length; i++) {
-      if (columnsHeights[i] <= minHeight) {
-        minHeight = columnsHeights[i]
-        minIndex = i
-      }
-    }
-    return minIndex
+    return columns.reduce((col, minCol) => {
+      return (col.height < minCol.height) ? col : minCol
+    }, { height: Infinity })
   }
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
     const h = 1 / item.ratio
-    const index = findMinColumn()
-    columns[index].push(item)
-    columnsHeights[index] += h
+    const column = findMinColumn()
+    column.items.push(item)
+    column.height += h
   }
 
   const imagesList = bel`<ul class="list ma0 pa0 pl2 pt2 helvetica fw2">
-    ${columns.map((columnItems) => {
+    ${columns.map(({items}) => {
       return bel`
         <li class="fl w-20 pr2">
-        ${columnItems.map((item) => {
+        ${items.map((item) => {
           var url = `images/${item.path}/${item.thumb}`
           return bel`
           <div class="mb2 relative hide-child">

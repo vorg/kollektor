@@ -19,10 +19,15 @@ const scanDir = require('./lib/scan-dir')
 const path = require('path')
 const url = require('url')
 const browserify = require('browserify')
+const fs = require('fs')
+const isThumbnail = require('./lib/is-thubmnail')
+const generateThumbnail = require('./lib/generate-thumbnail')
 
 // Initialize logger
 debug.enable('kollektor')
 const log = debug('kollektor')
+
+const THUMB_WIDTH = 600
 
 // ## Command line options
 //
@@ -96,7 +101,21 @@ function startServer (items) {
   app.get('/images/*', (req, res) => {
     var filePath = path.relative('/images', url.parse(req.path).pathname)
     filePath = path.normalize(dir + '/' + filePath)
-    res.sendFile(filePath)
+    fs.access(filePath, fs.constants.R_OK, (err) => {
+      if (!err) {
+        res.sendFile(filePath)
+      } else {
+        var orig = isThumbnail(filePath)
+        console.log(' orig exists: ' + orig)
+        if (orig) {
+          generateThumbnail(orig, filePath, THUMB_WIDTH, () => {
+            res.sendFile(filePath)
+          })
+        } else {
+          res.end()
+        }
+      }
+    })
   })
 
   // Start the server on a given port

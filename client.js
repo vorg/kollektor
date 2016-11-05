@@ -65,7 +65,7 @@ request.json('api/get/', (err, items) => {
     const column = findMinColumn()
     column.items.push(item)
     column.height += h
-    const url = `images/${item.path}/${item.cached}`
+    const url = `/images/${item.path}/${item.cached}`
     const itemElem = bel`
       <div class="mb2 relative hide-child">
       <a href="${url}"><img src="${url}.thumb"/></a>
@@ -76,7 +76,7 @@ request.json('api/get/', (err, items) => {
       <div class="pa1 f6">
       ${item.tags.map((tag, index) => {
         const comma = (index < item.tags.length - 1) ? bel`, ` : null
-        return [bel`<a href="tag/${tag}" class="red no-underline underline-hover">${tag}</a>`, comma]
+        return [bel`<a href="/tag/${tag}" class="red no-underline underline-hover">${tag}</a>`, comma]
       })}
       </div>
       </div>

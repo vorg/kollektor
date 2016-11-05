@@ -100,6 +100,7 @@ function startServer (items) {
   // Serve individual image files from the given path
   app.get('/images/*', (req, res) => {
     var filePath = path.relative('/images', url.parse(req.path).pathname)
+    filePath = unescape(filePath)
     filePath = path.normalize(dir + '/' + filePath)
     fs.access(filePath, fs.constants.R_OK, (err) => {
       if (!err) {

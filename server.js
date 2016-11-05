@@ -11,10 +11,12 @@
 // - sync files across multiple kollektor instances.
 //   That's currently handles by 3rd party e.g. Dropbox
 
+const debug = require('debug')
+debug.enable('kollektor:*')
+
 const commander = require('commander')
 const pacakge = require('./package.json')
 const express = require('express')
-const debug = require('debug')
 const scanDir = require('./lib/scan-dir')
 const path = require('path')
 const url = require('url')
@@ -24,8 +26,7 @@ const generateThumbnail = require('./lib/generate-thumbnail')
 const endsWith = require('ends-with')
 
 // Initialize logger
-debug.enable('kollektor')
-const log = debug('kollektor')
+const log = debug('kollektor:server')
 
 const THUMB_WIDTH = 600
 

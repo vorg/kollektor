@@ -45,10 +45,10 @@ request.json('api/get/', (err, items) => {
       return bel`
         <li class="fl w-20 pr2">
         ${items.map((item) => {
-          var url = `images/${item.path}/${item.thumb}`
+          var url = `images/${item.path}/${item.cached}`
           return bel`
           <div class="mb2 relative hide-child">
-            <a href="images/${item.path}/${item.cached}"><img src="${url}"/></a>
+            <a href="${url}"><img src="${url}.thumb"/></a>
             <div class="absolute top-0 w-100">
               <div class="bg-white ma1 child">
                 <a href="${item.referer}" class="no-underline underline-hover gray pa1 f6 db">${extractHost(item.referer)}</a>

@@ -20,8 +20,8 @@ const path = require('path')
 const url = require('url')
 const browserify = require('browserify')
 const fs = require('fs')
-const isThumbnail = require('./lib/is-thubmnail')
 const generateThumbnail = require('./lib/generate-thumbnail')
+const endsWith = require('ends-with')
 
 // Initialize logger
 debug.enable('kollektor')
@@ -105,13 +105,20 @@ function startServer (items) {
       if (!err) {
         res.sendFile(filePath)
       } else {
-        var orig = isThumbnail(filePath)
-        console.log(' orig exists: ' + orig)
-        if (orig) {
-          generateThumbnail(orig, filePath, THUMB_WIDTH, () => {
-            res.sendFile(filePath)
-          })
+        if (endsWith(filePath, '.thumb')) {
+          var orig = filePath.substring(0, filePath.length - 6)
+          var thumb = filePath
+          log('Orig?', orig)
+          if (fs.existsSync(orig)) {
+            generateThumbnail(orig, thumb, THUMB_WIDTH, () => {
+              res.sendFile(thumb)
+            })
+          } else {
+            log('ERROR', 'No source file to make thumbnail')
+            res.end()
+          }
         } else {
+          log('ERROR', 'Not a thumbnail')
           res.end()
         }
       }

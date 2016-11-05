@@ -6,8 +6,7 @@ var exec = require('sync-exec')
 
 var DB_CONFIG = {
   'driver': 'sqlite3',
-  'filename': __dirname + '/content/kollektor.sqlite',
-  'defautFilename': 'content/kollektor.sqlite.default'
+  'filename': __dirname + '/content/kollektor.sqlite'
 }
 persist.setDefaultConnectOptions(DB_CONFIG)
 
@@ -18,7 +17,7 @@ var numFiles = files.length
 console.log('files', files.length)
 console.log(files.slice(0, 10))
 
-var targetPath = '/Users/vorg/Downloads/Kollektor'
+var targetPath = '/Users/vorg/Dropbox/Kollektor'
 
 if (!fs.existsSync(targetPath)) {
   fs.mkdirSync(targetPath)
@@ -54,17 +53,18 @@ persist.connect(function (err, connection) {
 
     var stat = fs.statSync(fullFilePath)
     var month = stat.ctime.getFullYear() + '-' + ('0' + stat.ctime.getMonth()).slice(-2)
+
     var targetMonthPath = targetPath + '/' + month
     var targetFilePath = targetMonthPath + '/' + file
-    var targetThumbPath = targetMonthPath + '/' + baseFileName + '_thumb' + extName
-    var targetDataPath = targetMonthPath + '/' + baseFileName + '.json'
+    // var targetThumbPath = targetMonthPath + '/' + baseFileName + '_thumb' + extName
+    var targetDataPath = targetMonthPath + '/' + file + '.json'
 
     if (!fs.existsSync(targetMonthPath)) {
       fs.mkdirSync(targetMonthPath)
     }
 
     exec(`cp ${fullFilePath} ${targetFilePath}`)
-    exec(`cp ${fullThumbPath} ${targetThumbPath}`)
+    // exec(`cp ${fullThumbPath} ${targetThumbPath}`)
 
     function saveData (data) {
       var dataStr = JSON.stringify(data, null, 2)
@@ -82,7 +82,7 @@ persist.connect(function (err, connection) {
         // Here we use created as we know files were added by collector so the time
         // is increasing as we add new files. However if we now add support for
         // just dragging files into a folder, then we probably should use the date from json
-        // or the date when the json was created. This will bring another problem when uploading files: 
+        // or the date when the json was created. This will bring another problem when uploading files:
         // how to detect if file was uploaded and we are about to create json file immediately with user suplied data
         // or somebody just put a new file into a folder and we have create json file ourselves with default data.
         added: stat.ctime.toISOString(),
@@ -90,7 +90,7 @@ persist.connect(function (err, connection) {
         referer: imageData.referer || '',
         original: imageData.originalUrl || '',
         cached: imageData.cachedUrl || '',
-        thumb: imageData.thumbUrl || '',
+        // thumb: imageData.thumbUrl || '',
         ratio: imageData.ratio || '',
         tags: []
       }

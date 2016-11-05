@@ -1,9 +1,12 @@
 const request = require('d3-request')
 const bel = require('bel')
 const debug = require('debug')
+const url = require('url')
 
 debug.enable('kollektor-client')
 const log = debug('kollektor-client')
+
+const urlPath = url.parse(document.location.href).path
 
 function extractHost (url) {
   if (!url || url === '') return 'Unknown'
@@ -13,7 +16,7 @@ function extractHost (url) {
 }
 
 log('Trying to request items')
-request.json('api/get/', (err, items) => {
+request.json('/api/get' + urlPath, (err, items) => {
   log('Items', err, items)
   const imagesData = items.reverse() // newest first
 

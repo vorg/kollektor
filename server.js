@@ -79,6 +79,10 @@ function startServer (items) {
   // Serve root path / from public folder with static assets (html, css)
   app.use(express.static(__dirname + '/public'))
 
+  app.get('/tag/*', (req, res) => {
+    res.sendFile(__dirname + '/public/index.html')
+  })
+
   // Client web interface code is bundled on the fly. This probably shouldn't go into production.
   app.get('/client.bundle.js', (req, res) => {
     var b = browserify()
@@ -91,6 +95,20 @@ function startServer (items) {
         res.send(buf)
       }
     })
+  })
+  app.get('/api/get/tag/:tags', (req, res) => {
+    const tags = req.params.tags.split('+')
+    const taggedItems = items.filter((item) => {
+      let hasTags = 0
+      for (let i = 0; i < tags.length; i++) {
+        const tag = tags[i]
+        if (item.tags.indexOf(tag) !== -1) {
+          hasTags++
+        }
+      }
+      return hasTags === tags.length
+    })
+    res.send(JSON.stringify(taggedItems))
   })
 
   // API for getting all items currently in the db

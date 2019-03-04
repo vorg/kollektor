@@ -64,28 +64,42 @@ request.json('/api/get' + urlPath, (err, items) => {
   loadMore()
 
   function addImage (item) {
-    const h = 1 / item.ratio
     const column = findMinColumn()
     column.items.push(item)
-    column.height += h
-    const url = `/images/${item.path}/${item.cached}`
+    column.height += 1
+    const imageUrl = `${server}/api/get/image/${item.path}`
+    const thumbUrl = `${server}/api/get/thumb/${item.path}`
+    const jsonUrl = `${server}/api/get/info/${item.path}`
     const itemElem = bel`
       <div class="mb2 relative hide-child">
-      <a href="${url}"><img src="${url}.thumb"/></a>
-      <div class="absolute top-0 w-100">
-      <div class="bg-white ma1 child">
-      <a href="${item.referer}" class="no-underline underline-hover gray pa1 f6 db">${extractHost(item.referer)}</a>
-      <a href="${item.referer}" class="no-underline underline-hover gray pa1 f5 db link"><h2 class="ma0 fw3 near-black">${item.title}</h2></a>
-      <div class="pa1 f6">
-      ${item.tags.map((tag, index) => {
-        const comma = (index < item.tags.length - 1) ? bel`, ` : null
-        return [bel`<a href="/tag/${tag}" class="red no-underline underline-hover">${tag}</a>`, comma]
-      })}
-      </div>
-      </div>
-      </div>
-      </div>
-    `
+      </div>`
+
+    request.json(jsonUrl, (err, item) => {
+      column.height -= 1
+      if (!item) {
+        return        
+      }
+      const h = 1 / item.ratio
+      column.height += h
+      const contents = bel`<div>
+        <a href="${imageUrl}"><img src="${thumbUrl}"/></a>
+        <div class="absolute top-0 w-100">
+        <div class="bg-white ma1 child">
+        <a href="${item.referer}" class="no-underline underline-hover gray pa1 f6 db">${extractHost(item.referer)}</a>
+        <a href="${item.referer}" class="no-underline underline-hover gray pa1 f5 db link"><h2 class="ma0 fw3 near-black">${item.title}</h2></a>
+        <div class="pa1 f6">
+        ${item.tags.map((tag, index) => {
+          const comma = (index < item.tags.length - 1) ? bel`, ` : null
+          return [bel`<a href="/tag/${tag}" class="red no-underline underline-hover">${tag}</a>`, comma]
+        })}
+        </div>
+        </div>
+        </div>
+        </div>
+      `
+      itemElem.appendChild(contents)
+    })
+
     column.elem.appendChild(itemElem)
   }
 })

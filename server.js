@@ -24,6 +24,7 @@ const browserify = require('browserify')
 const fs = require('fs')
 const generateThumbnail = require('./lib/generate-thumbnail')
 const endsWith = require('ends-with')
+const jimp = require('jimp')
 
 // Initialize logger
 const log = debug('kollektor:server')
@@ -47,12 +48,14 @@ commander
   .parse(process.argv)
 
 const port = commander.port || 3000
-const dir = commander.args[0]
+let dir = commander.args[0]
 
 if (!dir) {
   commander.help()
   process.exit(-1)
 }
+
+dir = path.resolve(__dirname, dir)
 
 // ## Init
 
@@ -60,11 +63,11 @@ if (!dir) {
 
 log(`Scanning "${dir}" for files`)
 scanDir(dir, (err, items) => {
-  log(`Scan complete. ${items.length} items found`)
   if (err) {
     log('ERROR', err)
     return
   }
+  log(`Scan complete. ${items.length} items found`)
 
   startServer(items)
 })
@@ -72,6 +75,19 @@ scanDir(dir, (err, items) => {
 // ## Server
 
 // Now we start a web server responsible for handline API requests and serving the web interface
+
+function getImageSize (file, ext, cb) {
+  jimp.read(file, function (err, img) {
+    if (err) {
+      cb(err, null)
+    } else {
+      cb(null, {
+        width: img.bitmap.width,
+        height: img.bitmap.height
+      })
+    }
+  })
+}
 
 function startServer (items) {
   var app = express()
@@ -112,36 +128,67 @@ function startServer (items) {
   })
 
   // API for getting all items currently in the db
-  app.get('/api/get/*', (req, res) => {
+  app.get('/api/get/items', (req, res) => {
     res.send(JSON.stringify(items))
   })
 
-  // Serve individual image files from the given path
-  app.get('/images/*', (req, res) => {
-    var filePath = path.relative('/images', url.parse(req.path).pathname)
-    filePath = unescape(filePath)
-    filePath = path.normalize(dir + '/' + filePath)
+  function getOrCreate (req, res, basePath, ext, type, createCallback) {
+    var file = path.relative(basePath, url.parse(req.path).pathname)
+    file = unescape(file)
+    var filePath = path.normalize(dir + '/' + file) + ext
     fs.access(filePath, fs.constants.R_OK, (err) => {
       if (!err) {
+        res.type(type)
         res.sendFile(filePath)
-      } else {
-        if (endsWith(filePath, '.thumb')) {
-          var orig = filePath.substring(0, filePath.length - 6)
-          var thumb = filePath
-          log('Orig?', orig)
-          if (fs.existsSync(orig)) {
-            generateThumbnail(orig, thumb, THUMB_WIDTH, () => {
-              res.sendFile(thumb)
-            })
-          } else {
-            log('ERROR', 'No source file to make thumbnail')
-            res.end()
+      } else if (createCallback) {
+        createCallback(file, filePath, (err, data) => {
+          if (err) log(err)
+          try {
+            fs.writeFileSync(filePath, data)
+          } catch (e) {
+            log('Write failed for', filePath, e)
           }
-        } else {
-          log('ERROR', 'Not a thumbnail')
-          res.end()
-        }
+          res.type(type)
+          res.sendFile(filePath)
+        })
+      } else {
+        log('ERROR', 'Not found')
+        res.end()
       }
+    })
+  }
+  app.get('/api/get/image/*', (req, res) => {
+    getOrCreate(req, res, '/api/get/image', '', 'jpg')
+  })
+
+  app.get('/api/get/thumb/*', (req, res) => {
+    getOrCreate(req, res, '/api/get/thumb', '', 'jpg', (filePath, cb) => {
+    })
+  })
+
+  // Serve individual image info from the given path
+  app.get('/api/get/info/*', (req, res) => {
+    getOrCreate(req, res, '/api/get/info', '.json', 'json', (file, filePath, cb) => {
+      var ext = path.extname(file)
+      var basename = path.basename(file, ext)
+      let item = {
+        path: file,
+        added: (new Date()).toISOString(),
+        title: basename,
+        referer: '',
+        original: '',
+        cached: basename + ext,
+        ratio: 1.8768328445747802,
+        tags: []
+      }
+      getImageSize(file, ext, (err, size) => {
+        if (err) log(file, err)
+        if (size) {
+          item.ratio = size.width / size.height
+        }
+        var str = JSON.stringify(item)
+        cb(null, str)
+      })
     })
   })
 

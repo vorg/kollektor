@@ -8,7 +8,7 @@ const R = require('ramda')
 debug.enable('kollektor-client')
 const log = debug('kollektor-client')
 
-const urlPath = url.parse(document.location.href).path
+const server = 'http://' + document.location.host
 
 function extractHost (url) {
   if (!url || url === '') return 'Unknown'

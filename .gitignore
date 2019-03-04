@@ -5,3 +5,4 @@ content/*.sqlite
 stuff/
 node_modules/
 *.command
+images

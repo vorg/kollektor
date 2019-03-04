@@ -67,7 +67,7 @@ request.json(`${server}/api/get/items`, (err, items) => {
   window.addEventListener('scroll', (e) => {
     var docH = document.body.offsetHeight
     var winH = window.innerHeight
-    var scrollTop = document.body.scrollTop
+    var scrollTop = window.scrollY
     if (scrollTop + winH > docH - 500) {
       loadMore()
     }

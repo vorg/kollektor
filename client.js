@@ -2,6 +2,8 @@ const request = require('d3-request')
 const bel = require('bel')
 const debug = require('debug')
 const url = require('url')
+const path = require('path')
+const R = require('ramda')
 
 debug.enable('kollektor-client')
 const log = debug('kollektor-client')

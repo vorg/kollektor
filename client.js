@@ -16,24 +16,46 @@ function extractHost (url) {
 }
 
 log('Trying to request items')
-request.json('/api/get' + urlPath, (err, items) => {
+request.json(`${server}/api/get/items`, (err, items) => {
   log('Items', err, items)
   const imagesData = items.reverse() // newest first
 
-  const numColumns = 5
+  const numColumns = Math.ceil(window.innerWidth / 300)
+  const columnWidth = `${100 / numColumns}%`
   const columns = []
   let index = 0
   const maxImagesLimit = 50
 
   for (let i = 0; i < numColumns; i++) {
-    const elem = bel`<li class="fl w-20 pr2"></li>`
+    const elem = bel`<li class="fl pr2" style="width:${columnWidth}"></li>`
     columns.push({ items: [], height: 0, elem: elem })
   }
 
-  const imagesList = bel`<ul class="list ma0 pa0 pl2 pt2 helvetica fw2 overflow-auto">
+  const folderName = (item) => path.dirname(item.path)
+  const filesByFolder = R.groupBy(folderName, items)
+  const folders = Object.keys(filesByFolder).slice(0, numColumns * 3 - 1)
+
+  const folderList = bel`<ul class="list ma0 pa0 pl2 pt2 code black-70 fw2 overflow-auto fixed w-100 z-1 bg-white f6">
+    ${folders.map((folder) => {
+      const item = filesByFolder[folder][0]
+      const thumbUrl = `${server}/api/get/thumb/${item.path}`
+      return bel`<div class="fl pr2 pb2 dim" style="width:${columnWidth}">
+        <div class="flex flex-row bg-light-gray"> 
+          <div class="bg-red" style="min-width: 2.2em; background: url('${thumbUrl}'); background-size: cover; background-position: 50% 50%;"></div>
+          <div class="pa2 pointer truncate">
+            ${folder}
+          </div>
+        </div>
+      </div>`
+    })}
+  </ul>`
+
+  const marginTop = `calc(${Math.ceil(folders.length / numColumns)} * 2.8em);`
+  const imagesList = bel`<ul class="list ma0 pa0 pl2 pt2 helvetica fw2 overflow-auto" style="padding-top: ${marginTop}">
     ${columns.map((item) => item.elem)}
   </ul>`
 
+  document.body.appendChild(folderList)
   document.body.appendChild(imagesList)
 
   function findMinColumn () {

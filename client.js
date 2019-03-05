@@ -28,13 +28,26 @@ function extractHost (url) {
   return url.substr(0, slashPosition)
 }
 
-function folderElem (folder, folderItems) {
-  const item = folderItems[0]
+function folderElem (folder) {
+  const item = folder.items[0]
   const thumbUrl = `${server}/api/get/thumb/${item.path}`
-  const tagUrl = `${server}/tag/${toAlphaNumeric(folder)}`
-  return ['div', { class: 'fl pr2 pb2 dim pointer', style: { width: state.columnWidth } },
-    ['a', { href: tagUrl, class: 'no-underline black' },
-      ['div', { class: 'flex flex-row bg-white' },
+  const tagUrl = `${server}/tag/${folder.tag}`
+  const bg = folder.dragOver ? 'bg-light-yellow' : 'bg-white'
+  const color = folder.dragOver ? 'black' : 'black'
+  return ['div', {
+    class: 'fl pr2 pb2 dim pointer',
+    style: { width: state.columnWidth }
+  },
+    ['a', {
+      href: tagUrl,
+      class: `no-underline black ${color}`,
+      'data-name': folder.name,
+      ondragenter: onDragEnter,
+      ondragover: onDragOver,
+      ondragleave: onDragLeave,
+      ondrop: onDrop
+    },
+      ['div', { class: `flex flex-row ${bg} no-pointer-events` },
         ['div', {
           style: {
             'min-width': '2.2em',
@@ -43,34 +56,88 @@ function folderElem (folder, folderItems) {
             'background-position': '50% 50%'
           }
         }],
-        ['div', { class: 'pa2 truncate' }, folder]
+        ['div', { class: 'pa2 truncate' }, folder.name]
       ]
     ]
   ]
 }
 
+function onDragStart (event) {
+  let elem = event.target
+  let path = elem.dataset.path
+  if (!path) {
+    elem = elem.parentElement
+  }
+  const item = R.find(R.propEq('path', path), state.items)
+
+  log('onDragStart', path, event.target, event, item)
+  event.dataTransfer.setData('text/plain', path)
+  event.dataTransfer.dropEffect = 'move'
+
+  const img = event.target.querySelector('img')
+  event.dataTransfer.setDragImage(img, 10, 10)
+}
+
+function onDragEnter (event) {
+  const name = event.srcElement.dataset.name
+  log('onDragEnter', event, name)
+
+  state.folders.forEach((folder) => {
+    folder.dragOver = folder.name === name
+  })
+  event.preventDefault()
+
+  render()
+}
+
+function onDragOver (event) {
+  event.preventDefault()
+}
+
+function onDragLeave (event) {
+  state.folders.forEach((folder) => {
+    folder.dragOver = false
+  })
+
+  render()
+}
+
+function onDrop (event) {
+  event.preventDefault()
+  const path = event.dataTransfer.getData('text/plain')
+  const folderName = event.srcElement.dataset.name
+  const item = R.find(R.propEq('path', path), state.items)
+  const newFolder = R.find(R.propEq('name', folderName), state.folders)
+  const oldFolder = R.find(R.propEq('name', item.folder), state.folders)
+  // TODO: mutation
+  item.tags = item.tags.filter((t) => t !== oldFolder.tag)
+  item.tags.push(newFolder.tag)
+  item.folder = newFolder.name
+  log('drop', item, 'to', folderName)
+}
+
 function itemElem (item) {
   const imageUrl = `${server}/api/get/image/${item.path}`
   const thumbUrl = `${server}/api/get/thumb/${item.path}`
-  return ['div', { class: 'hide-child relative' },
-    ['a', { href: imageUrl },
-      ['img', { src: thumbUrl }]
+  return ['div', { class: 'hide-child relative', draggable: true, ondragstart: onDragStart, 'data-path': item.path },
+    ['a', { href: imageUrl, class: 'no-drag' },
+      ['img', { src: thumbUrl, class: 'no-drag' }]
     ],
     ['div', { class: 'absolute top-0 w-100' },
       ['div', { class: 'bg-white ma1 child' },
         ['a',
-          { href: item.referer, class: 'no-underline underline-hover gray pa1 f6 db' },
+          { href: item.referer, class: 'no-drag no-underline underline-hover gray pa1 f6 db' },
           extractHost(item.referer)
         ],
         ['a',
-          { href: item.referer, class: 'no-underline underline-hover gray pa1 f5 db link' },
+          { href: item.referer, class: 'no-drag no-underline underline-hover gray pa1 f5 db link' },
           ['h2', { class: 'ma0 fw3 near-black' }, item.title]
         ],
         ['div', { class: 'pa1 f6' },
           (item.tags || []).map((tag, index) => {
             const comma = (index < item.tags.length - 1) ? ', ' : null
             return ['a',
-              { href: `/tag/${tag}`, class: 'red no-underline underline-hover' },
+              { href: `/tag/${tag}`, class: 'no-drag red no-underline underline-hover' },
               tag, comma
             ]
           })
@@ -116,8 +183,9 @@ log('Trying to request items')
 request.json(`${server}/api/get/items`, (err, items) => {
   log('Items', err, items)
 
-  state.items = items.reverse().map((item) => ({
+  state.items = items.reverse().map((item, i) => ({
     ...item,
+    id: `item-${i}`,
     title: path.basename(item.path),
     folder: folderName(item),
     tags: [toAlphaNumeric(folderName(item))]
@@ -136,7 +204,12 @@ request.json(`${server}/api/get/items`, (err, items) => {
   }
 
   const itemsByFolder = R.groupBy(R.prop('folder'), state.items)
-  const folders = Object.keys(itemsByFolder).slice(0, numColumns * 3 - 1)
+  const folders = Object.keys(itemsByFolder).slice(0, numColumns * 3 - 1).map((folder) => ({
+    name: folder,
+    tag: toAlphaNumeric(folder),
+    items: itemsByFolder[folder],
+    dragOver: false
+  }))
 
   if (state.urlpath[1] === 'tag') {
     const tag = state.urlpath[2]

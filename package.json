@@ -3,6 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "@thi.ng/hdom": "^7.1.2",
+    "@thi.ng/rstream": "^2.2.0",
+    "@thi.ng/transducers": "^5.1.2",
+    "@thi.ng/transducers-hdom": "^2.0.9",
     "bel": "^4.5.0",
     "body-parser": "^1.11.0",
     "browserify": "^13.1.1",
@@ -20,6 +24,7 @@
     "jimp": "^0.2.28",
     "mime-magic": "^5.14.0",
     "persist": "^0.2.7",
+    "ramda": "^0.26.1",
     "read-chunk": "^2.0.0",
     "recursive-readdir": "^2.1.0",
     "sqlite3": "^3.0.4",

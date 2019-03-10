@@ -16,6 +16,7 @@ debug.enable('kollektor:*')
 
 const commander = require('commander')
 const pacakge = require('./package.json')
+const bodyParser = require('body-parser')
 const express = require('express')
 const scanDir = require('./lib/scan-dir')
 const path = require('path')
@@ -25,6 +26,9 @@ const fs = require('fs')
 const generateThumbnail = require('./lib/generate-thumbnail')
 const endsWith = require('ends-with')
 const jimp = require('jimp')
+const subdir = require('subdir')
+const R = require('ramda')
+const mkdirp = require('mkdirp')
 
 // Initialize logger
 const log = debug('kollektor:server')
@@ -57,7 +61,7 @@ if (!dir) {
 
 dir = path.resolve(__dirname, dir)
 
-// ## Init
+// ## Init/bod
 
 // Scan given folder for all images and their metadata
 
@@ -91,6 +95,8 @@ function getImageSize (file, ext, cb) {
 
 function startServer (items) {
   var app = express()
+
+  app.use(bodyParser.json())
 
   // Serve root path / from public folder with static assets (html, css)
   app.use(express.static(__dirname + '/public'))
@@ -190,6 +196,56 @@ function startServer (items) {
         cb(null, str)
       })
     })
+  })
+
+  app.post('/api/move/image', (req, res) => {
+    var data = req.body
+    log(`move '${data.from}' -> '${data.to}'`)
+    const targetDir = path.resolve(dir, path.dirname(data.to))
+    if (!subdir(dir, data.from) || !subdir(dir, data.to)) {
+      console.log('path is invalid', data.to, targetDir)
+      res.send({'error': 'invalid path'})
+      return res.end()
+    }
+
+    if (!fs.existsSync(targetDir)) {
+      console.log('path doesn\'t exist', targetDir)
+      mkdirp.sync(targetDir)
+    }
+
+    if (data.from === data.to) {
+      res.send({'status': 'ok', 'message': `nothing to move '${data.from}' = '${data.to}'`})
+      return res.end()
+    }
+
+    if (R.find(R.propEq('path', data.to), items)) {
+      var dot = data.to.lastIndexOf('.')
+      if (dot !== -1) {
+        data.to = data.to.substr(0, dot) + `_${Date.now()}` + data.to.substr(dot)
+      } else {
+        data.to += `_${Date.now()}`
+      }
+    }
+
+    try {
+      const item = R.find(R.propEq('path', data.from), items)
+      console.log('updating item', item)
+      item.path = data.to
+      console.log('updating item', item)
+      fs.rename(
+        path.resolve(dir, data.from),
+        path.resolve(dir, data.to),
+        (err) => {
+          console.log('done', err)
+          if (err) res.send({'error': 'move failed ' + err})
+          else res.send({'status': 'ok', 'message': `moved '${data.from}' to '${data.to}'`})
+          res.end()
+        }
+      )
+    } catch (e) {
+      res.send({'error': 'move failed ' + e.message})
+      return res.end()
+    }
   })
 
   // Start the server on a given port

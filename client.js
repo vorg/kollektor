@@ -211,8 +211,8 @@ function onItemClick (event) {
 }
 
 function itemElem (item) {
-  const imageUrl = `${server}/api/get/image/${item.path}`
-  const thumbUrl = `${server}/api/get/thumb/${item.path}`
+  const imageUrl = `${server}/api/get/image/${encodeURIComponent(item.path)}`
+  const thumbUrl = `${server}/api/get/thumb/${encodeURIComponent(item.path)}`
   const opacity = item.selected ? ' o-50' : ''
   const dn = item.selected ? 'dn' : ''
   const bg = item.selected ? 'bg-green' : ''

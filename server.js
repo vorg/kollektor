@@ -170,18 +170,19 @@ function startServer (items) {
   }
   app.get('/api/get/image/*', (req, res) => {
     const basePath = '/api/get/image'
-    const file = unescape(path.resolve(dir, path.relative(basePath, req.path)))
+    const file = decodeURIComponent(path.resolve(dir, path.relative(basePath, req.path)))
     res.sendFile(file)
   })
 
   app.get('/api/get/thumb/*', (req, res) => {
     const basePath = '/api/get/thumb'
-    const file = unescape(path.resolve(dir, path.relative(basePath, req.path)))
+    const file = decodeURIComponent(path.resolve(dir, path.relative(basePath, req.path)))
 
     fs.stat(file, (err, stat) => {
       if (err) {
-        log('error' + err.message)
+        log('Thumbnail error: ' + err.message)
         res.end()
+        return
       }
       const hash = crypto.createHash('md5').update(file + stat.size).digest('hex')
       const cachedFile = path.resolve(cacheDir, hash + '.jpg')

@@ -6,3 +6,4 @@ stuff/
 node_modules/
 *.command
 images
+cache

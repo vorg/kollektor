@@ -24,11 +24,11 @@ const url = require('url')
 const browserify = require('browserify')
 const fs = require('fs')
 const generateThumbnail = require('./lib/generate-thumbnail')
-const endsWith = require('ends-with')
 const jimp = require('jimp')
 const subdir = require('subdir')
 const R = require('ramda')
 const mkdirp = require('mkdirp')
+const crypto = require('crypto')
 
 // Initialize logger
 const log = debug('kollektor:server')
@@ -60,6 +60,11 @@ if (!dir) {
 }
 
 dir = path.resolve(__dirname, dir)
+
+const cacheDir = path.resolve(__dirname, 'cache')
+if (!fs.existsSync(cacheDir)) {
+  mkdirp.sync(cacheDir)
+}
 
 // ## Init/bod
 
@@ -99,16 +104,16 @@ function startServer (items) {
   app.use(bodyParser.json())
 
   // Serve root path / from public folder with static assets (html, css)
-  app.use(express.static(__dirname + '/public'))
+  app.use(express.static(path.resolve(__dirname, 'public')))
 
   app.get('/tag/*', (req, res) => {
-    res.sendFile(__dirname + '/public/index.html')
+    res.sendFile(path.resolve(__dirname, 'public/index.html'))
   })
 
   // Client web interface code is bundled on the fly. This probably shouldn't go into production.
   app.get('/client.bundle.js', (req, res) => {
     var b = browserify()
-    b.add(__dirname + '/client.js')
+    b.add(path.resolve(__dirname, 'client.js'))
     b.bundle((err, buf) => {
       if (err) {
         log('Client bundle error', err)
@@ -164,11 +169,30 @@ function startServer (items) {
     })
   }
   app.get('/api/get/image/*', (req, res) => {
-    getOrCreate(req, res, '/api/get/image', '', 'jpg')
+    const basePath = '/api/get/image'
+    const file = unescape(path.resolve(dir, path.relative(basePath, req.path)))
+    res.sendFile(file)
   })
 
   app.get('/api/get/thumb/*', (req, res) => {
-    getOrCreate(req, res, '/api/get/thumb', '', 'jpg', (filePath, cb) => {
+    const basePath = '/api/get/thumb'
+    const file = unescape(path.resolve(dir, path.relative(basePath, req.path)))
+
+    fs.stat(file, (err, stat) => {
+      if (err) {
+        log('error' + err.message)
+        res.end()
+      }
+      const hash = crypto.createHash('md5').update(file + stat.size).digest('hex')
+      const cachedFile = path.resolve(cacheDir, hash + '.jpg')
+      if (!fs.existsSync(cachedFile)) {
+        generateThumbnail(file, cachedFile, THUMB_WIDTH, (err, done) => {
+          log('done generating thumbnail', err, done)
+          res.sendFile(cachedFile)
+        })
+      } else {
+        res.sendFile(cachedFile)
+      }
     })
   })
 

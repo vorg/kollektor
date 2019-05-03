@@ -19,20 +19,20 @@ const state = {
   folders: [],
   columnWidth: 0,
   columns: [],
-  filterTag: (urlpath[1] === 'tag') ? urlpath[2] : null
+  filterTag: urlpath[1] === 'tag' ? urlpath[2] : null
 }
 
 window.state = state
 window.render = render
 
-function extractHost (url) {
+function extractHost(url) {
   if (!url || url === '') return 'Unknown'
   var slashPosition = url.indexOf('/', url.indexOf('//') + 3)
   if (slashPosition === -1) slashPosition = url.length
   return url.substr(0, slashPosition)
 }
 
-function onFolderClick (event) {
+function onFolderClick(event) {
   if (event.shiftKey) {
     event.preventDefault()
     event.stopPropagation()
@@ -40,14 +40,21 @@ function onFolderClick (event) {
     const folder = R.find(R.propEq('name', name), state.folders)
     folder.selected = !folder.selected
 
-    window.localStorage.selectedFolders = JSON.stringify(R.pluck('name', state.folders.filter(R.propEq('selected', true))))
+    window.localStorage.selectedFolders = JSON.stringify(
+      R.pluck('name', state.folders.filter(R.propEq('selected', true)))
+    )
     render()
   }
 }
 
-function folderElem (folder) {
+function folderElem(folder) {
   const item = folder.items[0]
-  const thumbUrl = (item && item.path) ? `${server}/api/get/thumb/${item.path}` : (item ? item.src : '')
+  const thumbUrl =
+    item && item.path
+      ? `${server}/api/get/thumb/${item.path}`
+      : item
+        ? item.src
+        : ''
   const tagUrl = `${server}/tag/${folder.tag}`
   const bg = folder.dragOver ? 'bg-light-green' : 'bg-white'
   const color = folder.dragOver ? 'black' : 'black'
@@ -55,38 +62,47 @@ function folderElem (folder) {
   if (!action && state.expandFolders) {
     action = onFolderClick
   }
-  const opacity = (folder.selected && state.expandFolders) ? 'o-50' : ''
-  const wholebg = (folder.selected && state.expandFolders) ? 'bg-green' : ''
-  return ['div', {
-    class: `fl pr2 pb2 dim pointer`,
-    style: { width: state.columnWidth }
-  },
-    ['a', {
-      href: tagUrl,
-      class: `no-underline black ${color} ${wholebg} dib w-100`,
-      'data-name': folder.name,
-      ondragenter: onDragEnter,
-      ondragover: onDragOver,
-      ondragleave: onDragLeave,
-      ondrop: onDrop,
-      onclick: action
+  const opacity = folder.selected && state.expandFolders ? 'o-50' : ''
+  const wholebg = folder.selected && state.expandFolders ? 'bg-green' : ''
+  return [
+    'div',
+    {
+      class: `fl pr2 pb2 dim pointer`,
+      style: { width: state.columnWidth }
     },
-      ['div', { class: `flex flex-row ${bg} no-pointer-events ${opacity}` },
-        ['div', {
-          style: {
-            'min-width': '2.2em',
-            'background': `url('${thumbUrl}')`,
-            'background-size': 'cover',
-            'background-position': '50% 50%'
+    [
+      'a',
+      {
+        href: tagUrl,
+        class: `no-underline black ${color} ${wholebg} dib w-100`,
+        'data-name': folder.name,
+        ondragenter: onDragEnter,
+        ondragover: onDragOver,
+        ondragleave: onDragLeave,
+        ondrop: onDrop,
+        onclick: action
+      },
+      [
+        'div',
+        { class: `flex flex-row ${bg} no-pointer-events ${opacity}` },
+        [
+          'div',
+          {
+            style: {
+              'min-width': '2.2em',
+              background: `url('${thumbUrl}')`,
+              'background-size': 'cover',
+              'background-position': '50% 50%'
+            }
           }
-        }],
+        ],
         ['div', { class: 'pa2 truncate' }, folder.name]
       ]
     ]
   ]
 }
 
-function onDragStart (event) {
+function onDragStart(event) {
   let elem = event.target
   let path = elem.dataset.path
   if (!path) {
@@ -109,7 +125,7 @@ function onDragStart (event) {
   render()
 }
 
-function onDragEnter (event) {
+function onDragEnter(event) {
   const name = event.srcElement.dataset.name
   log('onDragEnter', event, name)
 
@@ -121,11 +137,11 @@ function onDragEnter (event) {
   render()
 }
 
-function onDragOver (event) {
+function onDragOver(event) {
   event.preventDefault()
 }
 
-function onDragLeave (event) {
+function onDragLeave(event) {
   state.folders.forEach((folder) => {
     folder.dragOver = false
   })
@@ -133,19 +149,21 @@ function onDragLeave (event) {
   render()
 }
 
-function postData (url, data) {
-  return window.fetch(url, {
-    method: 'POST', // or 'PUT'
-    body: JSON.stringify(data), // data can be `string` or {object}!
-    headers: {
-      'Content-Type': 'application/json'
-    }
-  }).then(res => res.json())
+function postData(url, data) {
+  return window
+    .fetch(url, {
+      method: 'POST', // or 'PUT'
+      body: JSON.stringify(data), // data can be `string` or {object}!
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then((res) => res.json())
   // .then(response => console.log('Success:', JSON.stringify(response)))
   // .catch(error => console.error('Error:', error))
 }
 
-function onDrop (event) {
+function onDrop(event) {
   console.log('event', event)
   event.preventDefault()
   const path = event.dataTransfer.getData('text/plain')
@@ -175,7 +193,10 @@ function onDrop (event) {
   log('folders after drop', state.folders)
 
   dropItems.forEach((item) => {
-    const moveData = { from: item.path, to: item.path.replace(item.folder, folderName) }
+    const moveData = {
+      from: item.path,
+      to: item.path.replace(item.folder, folderName)
+    }
     log('dropping item', moveData)
     postData(moveImageUrl, moveData).then((res) => {
       console.log('done', res)
@@ -198,7 +219,7 @@ function onDrop (event) {
   })
 }
 
-function onItemClick (event) {
+function onItemClick(event) {
   if (event.shiftKey) {
     event.preventDefault()
     event.stopPropagation()
@@ -210,38 +231,61 @@ function onItemClick (event) {
   }
 }
 
-function itemElem (item) {
+function itemElem(item) {
   const imageUrl = `${server}/api/get/image/${encodeURIComponent(item.path)}`
   const thumbUrl = `${server}/api/get/thumb/${encodeURIComponent(item.path)}`
   const opacity = item.selected ? ' o-50' : ''
   const dn = item.selected ? 'dn' : ''
   const bg = item.selected ? 'bg-green' : ''
-  return ['div', {
-    class: 'hide-child relative ' + bg,
-    draggable: true,
-    ondragstart: onDragStart,
-    onclick: [onItemClick, { capture: true }],
-    'data-path': item.path
-  },
-    ['a', { href: imageUrl, class: 'no-drag ' + opacity },
+  return [
+    'div',
+    {
+      class: 'hide-child relative ' + bg,
+      draggable: true,
+      ondragstart: onDragStart,
+      onclick: [onItemClick, { capture: true }],
+      'data-path': item.path
+    },
+    [
+      'a',
+      { href: imageUrl, class: 'no-drag ' + opacity },
       ['img', { src: thumbUrl, class: 'no-drag' }]
     ],
-    ['div', { class: 'absolute top-0 w-100 ' + dn },
-      ['div', { class: 'bg-white ma1 child' },
-        ['a',
-          { href: item.referer, class: 'no-drag no-underline underline-hover gray pa1 f6 db' },
+    [
+      'div',
+      { class: 'absolute top-0 w-100 ' + dn },
+      [
+        'div',
+        { class: 'bg-white ma1 child' },
+        [
+          'a',
+          {
+            href: item.referer,
+            class: 'no-drag no-underline underline-hover gray pa1 f6 db'
+          },
           extractHost(item.referer)
         ],
-        ['a',
-          { href: item.referer, class: 'no-drag no-underline underline-hover gray pa1 f5 db link' },
+        [
+          'a',
+          {
+            href: item.referer,
+            class: 'no-drag no-underline underline-hover gray pa1 f5 db link'
+          },
           ['h2', { class: 'ma0 fw3 near-black' }, item.title]
         ],
-        ['div', { class: 'pa1 f6' },
+        [
+          'div',
+          { class: 'pa1 f6' },
           (item.tags || []).map((tag, index) => {
-            const comma = (index < item.tags.length - 1) ? ', ' : null
-            return ['a',
-              { href: `/tag/${tag}`, class: 'no-drag red no-underline underline-hover' },
-              tag, comma
+            const comma = index < item.tags.length - 1 ? ', ' : null
+            return [
+              'a',
+              {
+                href: `/tag/${tag}`,
+                class: 'no-drag red no-underline underline-hover'
+              },
+              tag,
+              comma
             ]
           })
         ]
@@ -250,10 +294,12 @@ function itemElem (item) {
   ]
 }
 
-function app () {
+function app() {
   let folders = state.folders.slice(0, state.folders.length - 2)
   let selectedFolders = folders.filter(R.propEq('selected', true))
-  let numFoldersToShow = state.expandFolders ? folders.length : state.columns.length * 3 - 2
+  let numFoldersToShow = state.expandFolders
+    ? folders.length
+    : state.columns.length * 3 - 2
   if (folders.length > numFoldersToShow) {
     folders = folders.slice(0, numFoldersToShow)
   }
@@ -264,19 +310,35 @@ function app () {
   folders.push(state.folders[state.folders.length - 2])
   // more button
   folders.push(state.folders[state.folders.length - 1])
-  const marginTop = state.expandFolders ? 0 : `calc(${Math.ceil(folders.length / state.columns.length)} * 2.8em);`
+  const marginTop = state.expandFolders
+    ? 0
+    : `calc(${Math.ceil(folders.length / state.columns.length)} * 2.8em);`
 
   const fixedHeader = state.expandFolders ? '' : 'fixed'
 
-  return ['div',
-    ['ul', { class: `list ma0 pa0 pl2 pt2 code black-70 fw2 overflow-auto ${fixedHeader} w-100 z-1 bg-light-gray f6` },
+  return [
+    'div',
+    [
+      'ul',
+      {
+        class: `list ma0 pa0 pl2 pt2 code black-70 fw2 overflow-auto ${fixedHeader} w-100 z-1 bg-light-gray f6`
+      },
       folders.map((folder) => folderElem(folder))
     ],
-    ['ul', { class: 'list ma0 pa0 pl2 pt2 helvetica fw2 overflow-auto', style: { 'padding-top': marginTop } },
-      state.columns.map((column) => ['li', { class: 'fl pr2', style: { width: state.columnWidth } },
+    [
+      'ul',
+      {
+        class: 'list ma0 pa0 pl2 pt2 helvetica fw2 overflow-auto',
+        style: { 'padding-top': marginTop }
+      },
+      state.columns.map((column) => [
+        'li',
+        { class: 'fl pr2', style: { width: state.columnWidth } },
         column.items
-        .filter((item) => !state.filterTag || item.tags.includes(state.filterTag))
-        .map((item) => itemElem(item))
+          .filter(
+            (item) => !state.filterTag || item.tags.includes(state.filterTag)
+          )
+          .map((item) => itemElem(item))
       ])
     ]
   ]
@@ -287,12 +349,9 @@ rs.sync({
     render: renderStream
   },
   reset: false
-}).transform(
-  tx.map(app),
-  updateDOM({ root: document.body })
-)
+}).transform(tx.map(app), updateDOM({ root: document.body }))
 
-function render () {
+function render() {
   log('render')
   renderStream.next(0)
 }
@@ -324,10 +383,11 @@ request.json(`${server}/api/get/items`, (err, items) => {
     columns.push({ items: [], height: 0 })
   }
 
-  const selectedFolders = JSON.parse(window.localStorage.selectedFolders || '[]')
+  const selectedFolders = JSON.parse(
+    window.localStorage.selectedFolders || '[]'
+  )
   const itemsByFolder = R.groupBy(R.prop('folder'), state.items)
-  const folders = Object.keys(itemsByFolder)
-  .map((folder) => ({
+  const folders = Object.keys(itemsByFolder).map((folder) => ({
     name: folder,
     tag: toAlphaNumeric(folder),
     items: itemsByFolder[folder],
@@ -337,7 +397,9 @@ request.json(`${server}/api/get/items`, (err, items) => {
   console.log(folders, selectedFolders)
 
   if (state.filterTag) {
-    state.items = state.items.filter((item) => item.tags.includes(state.filterTag))
+    state.items = state.items.filter((item) =>
+      item.tags.includes(state.filterTag)
+    )
   }
 
   console.log('state', state)
@@ -355,7 +417,7 @@ request.json(`${server}/api/get/items`, (err, items) => {
     dropAction: (event) => {
       console.log('drop action', event)
       var name = window.prompt('Folder Name')
-      name = name.replace(/[^a-zA-Z0-9 _!]/g, '_')
+      name = name.replace(/[^a-zA-Z0-9 -_!]/g, '_')
       console.log('drop action', name)
       event.preventDefault()
       event.stopPropagation()
@@ -365,7 +427,9 @@ request.json(`${server}/api/get/items`, (err, items) => {
       var folder = state.folders.find(R.propEq('name', name))
       if (folder) {
         folder.selected = true
-        window.localStorage.selectedFolders = JSON.stringify(R.pluck('name', state.folders.filter(R.propEq('selected', true))))
+        window.localStorage.selectedFolders = JSON.stringify(
+          R.pluck('name', state.folders.filter(R.propEq('selected', true)))
+        )
         console.log('reusing folder', folder)
         return name
       }
@@ -377,7 +441,9 @@ request.json(`${server}/api/get/items`, (err, items) => {
       }
       console.log('creating folder', folder)
       state.folders.unshift(folder)
-      window.localStorage.selectedFolders = JSON.stringify(R.pluck('name', state.folders.filter(R.propEq('selected', true))))
+      window.localStorage.selectedFolders = JSON.stringify(
+        R.pluck('name', state.folders.filter(R.propEq('selected', true)))
+      )
       console.log(state.folders)
       render()
       return name
@@ -387,9 +453,7 @@ request.json(`${server}/api/get/items`, (err, items) => {
       event.stopPropagation()
       window.alert('Drop images here')
     },
-    items: [
-      { src: '/style/plus.png' }
-    ]
+    items: [{ src: '/style/plus.png' }]
   })
   folders.push({
     name: 'More...',
@@ -399,9 +463,7 @@ request.json(`${server}/api/get/items`, (err, items) => {
       event.preventDefault()
       event.stopPropagation()
     },
-    items: [
-      { src: '/style/dot.png' }
-    ]
+    items: [{ src: '/style/dot.png' }]
   })
 
   state.itemsByFolder = itemsByFolder
@@ -409,7 +471,7 @@ request.json(`${server}/api/get/items`, (err, items) => {
   state.columnWidth = columnWidth
   state.columns = columns
 
-  function loadMore () {
+  function loadMore() {
     let i = 0
     while (i < maxImagesLimit) {
       if (index > state.items.length - 1) break
@@ -419,10 +481,13 @@ request.json(`${server}/api/get/items`, (err, items) => {
     }
   }
 
-  function findMinColumn () {
-    return columns.reduce((col, minCol) => {
-      return (col.height < minCol.height) ? col : minCol
-    }, { height: Infinity })
+  function findMinColumn() {
+    return columns.reduce(
+      (col, minCol) => {
+        return col.height < minCol.height ? col : minCol
+      },
+      { height: Infinity }
+    )
   }
 
   window.addEventListener('scroll', (e) => {
@@ -438,7 +503,7 @@ request.json(`${server}/api/get/items`, (err, items) => {
   render()
   loadMore()
 
-  function addImage (item) {
+  function addImage(item) {
     const column = findMinColumn()
     column.items.push(item)
     column.height += 1

@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start-server": "node server.js images --port 3010"
+    "start": "./run.sh"
   },
   "dependencies": {
     "@thi.ng/hdom": "^7.1.2",
@@ -31,7 +31,8 @@
     "ramda": "^0.26.1",
     "read-chunk": "^2.0.0",
     "recursive-readdir": "^2.1.0",
-    "sqlite3": "^3.0.4",
+    "sharp": "^0.30.7",
+    "sqlite3": "^5.0.8",
     "subdir": "0.0.3",
     "tachyons": "^4.5.4"
   }
